@@ -2,8 +2,10 @@ IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'NetOnNet')
   BEGIN
     CREATE DATABASE NetOnNet
     END
+GO
 
 USE NetOnNet
+GO
 
 IF OBJECT_ID ('dbo.Category','U') IS NULL
 BEGIN
@@ -109,20 +111,7 @@ CREATE TABLE dbo.[Return] (
 END;
 GO
 
-IF OBJECT_ID('dbo.Review','U') IS NULL
-BEGIN
-CREATE TABLE dbo.Review (
-    ReviewID    INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-    OrderID     INT NOT NULL,
-    CustomerID  INT NOT NULL,
-    Rating      INT NOT NULL,
-    Comment     NVARCHAR(MAX),
-    CreatedAt   DATE NOT NULL,
-    FOREIGN KEY (OrderID) REFERENCES dbo.[Order](OrderID),
-    FOREIGN KEY (CustomerID) REFERENCES dbo.Customer(CustomerID)
-)
-END;
-GO
+
 
 INSERT INTO dbo.Category (CategoryName) VALUES
 ('Dator & Surfplatta'),
@@ -506,13 +495,5 @@ INSERT INTO dbo.[Return] (OrderItemID, ReturnDate, Reason, Status, Notes) VALUES
 
 GO
 
-INSERT INTO dbo.Review (OrderID, CustomerID, Rating, Comment, CreatedAt) VALUES
-(3, 1, 5, 'Fantastisk laptop! Mycket snabb, lätt och bra batteri. Rekommenderas starkt!'),
-(2, 2, 4, 'Bra bildkvalitet och färger. Lite dyrt men värd pengarna. Leveransen var snabb.'),
-(22, 3, 3, 'Ok dator för priset. Processorn kunde vara snabbare. Bra skärm dock.'),
-(26, 4, 5, 'Underbar design och prestanda! Helt enkelt spektakulär. Värde för pengarna!'),
-(39, 9, 4, 'Tvättmaskinen fungerar utmärkt. Tyst och energieffektiv. Jag är nöjd!'),
-(50, 10, 5, 'Bästa diskmaskinen vi ägt! Rengör perfekt och är mycket tystare än förväntad.');
 
-GO
 
