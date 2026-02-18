@@ -36,23 +36,17 @@ CREATE TABLE dbo.Product (
     ProductName     NVARCHAR(255) NOT NULL,
     Price           DECIMAL(10, 2) NOT NULL,
     Cost            DECIMAL(10, 2) NOT NULL,
+    Color           NVARCHAR (20)
     CreatedAt       DATE NOT NULL,
-    FOREIGN KEY (SubCategoryID) REFERENCES dbo.SubCategory(SubCategoryID)
+    ProductDetails  JSON,
+    FOREIGN KEY (SubCategoryID) REFERENCES dbo.SubCategory(SubCategoryID),
+    CONSTRAINT CK_ProductPrice CHECK (Price >= 0)
+    CONSTRAINT CK_ProductCost CHECK (Cost >= 0)
 )
 END;
 GO
 
-IF OBJECT_ID('dbo.ProductAttribute','U') IS NULL
-BEGIN
-CREATE TABLE dbo.ProductAttribute (
-    AttributeID     INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-    ProductID       INT NOT NULL,
-    AttributeName    NVARCHAR(100) NOT NULL,
-    AttributeValue  NVARCHAR(255) NOT NULL,
-    FOREIGN KEY (ProductID) REFERENCES dbo.[Product](ProductID)
-)
-END;
-GO
+
 
 IF OBJECT_ID('dbo.Customer','U') IS NULL
 BEGIN
