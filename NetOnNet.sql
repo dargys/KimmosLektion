@@ -38,15 +38,21 @@ CREATE TABLE dbo.Product (
     Cost            DECIMAL(10, 2) NOT NULL,
     Color           NVARCHAR (20),
     CreatedAt       DATETIME DEFAULT GETDATE() NOT NULL,
-    ProductDetails  JSON,
+    ProductDetails  NVARCHAR(MAX) NULL,
     FOREIGN KEY (SubCategoryID) REFERENCES dbo.SubCategory(SubCategoryID),
     CONSTRAINT CK_ProductPrice CHECK (Price >= 0),
-    CONSTRAINT CK_ProductCost CHECK (Cost >= 0)
+    CONSTRAINT CK_ProductCost CHECK (Cost >= 0),
+    CONSTRAINT CK_ProductDetails_JSON CHECK (ProductDetails IS NULL OR ISJSON(ProductDetails) = 1)
+
 )
 END;
 GO
 
+/*ALTER TABLE dbo.Product
+ADD WarrantyYears AS JSON_VALUE(ProductDetails, '$.warrantyYears') PERSISTED;
 
+CREATE INDEX IX_Product_WarrantyYears
+ON dbo.Product(WarrantyYears);*/
 
 IF OBJECT_ID('dbo.Customer','U') IS NULL
 BEGIN
