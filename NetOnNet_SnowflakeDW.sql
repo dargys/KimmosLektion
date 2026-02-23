@@ -50,16 +50,31 @@ CREATE TABLE dbo.DimCustomer (
 );
 GO
 
+--Category Snowflake
+CREATE TABLE DimCategory (
+	CategoryID      INT         PRIMARY KEY,
+	CategoryName    NVARCHAR(50)
+);
+GO
+
+CREATE TABLE DimSubCategory (
+	SubCategoryID      INT      PRIMARY KEY,
+	SubCategoryName    NVARCHAR(50),
+	CategoryID         INT,
+	FOREIGN KEY (CategoryID) REFERENCES DimCategory(CategoryID)
+);
+GO
+
 CREATE TABLE dbo.DimProduct (
     ProductID               INT                 PRIMARY KEY,
     ProductName             NVARCHAR(100)       NOT NULL,
-    CategoryName            NVARCHAR(50)        NOT NULL,
-    SubCategoryName         NVARCHAR(50)        NOT NULL,
     SKU                     NVARCHAR(50)        NOT NULL,
     UnitPriceProduct        DECIMAL(10,2)       NOT NULL,
     PurchasePriceProduct    DECIMAL(10,2)       NOT NULL,
     Color                   NVARCHAR(20)        NULL,
-    CreatedDateProduct      DATE                NOT NULL
+    CreatedDateProduct      DATE                NOT NULL,
+    SubCategoryID           INT                 NOT NULL,
+    FOREIGN KEY (SubCategoryID) REFERENCES DimSubCategory(SubCategoryID)
 );
 GO
 
@@ -127,24 +142,40 @@ SELECT
     CAST(c.Phone AS NVARCHAR(50)) AS Phone
 FROM NetOnNet.dbo.Customer c;
 
+-- DimCategory (Snowflake)
+INSERT INTO dbo.DimCategory (
+    CategoryID, CategoryName
+)
+SELECT
+    c.CategoryID,
+    c.CategoryName
+FROM NetOnNet.dbo.Category c
+
+-- DimSubCategory (Snowflake)
+INSERT INTO dbo.DimSubCategory (
+    SubCategoryID, SubCategoryName, CategoryID
+)
+SELECT
+    sc.SubCategoryID,
+    sc.SubCategoryName,
+    sc.CategoryID
+FROM NetOnNet.dbo.SubCategory sc
+
 -- DimProduct
 INSERT INTO dbo.DimProduct (
-    ProductID, ProductName, CategoryName, SubCategoryName,
-    SKU, UnitPriceProduct, PurchasePriceProduct, Color, CreatedDateProduct
+    ProductID, ProductName, SKU, UnitPriceProduct, 
+    PurchasePriceProduct, Color, CreatedDateProduct, SubCategoryID
 )
 SELECT
     p.ProductID,
     p.ProductName,
-    cat.CategoryName,
-    sc.SubCategoryName,
     p.SKU,
     p.Price                             AS UnitPriceProduct,
     p.Cost                              AS PurchasePriceProduct,
     p.Color,
-    CAST(p.CreatedAt AS DATE) AS CreatedDateProduct
+    CAST(p.CreatedAt AS DATE) AS CreatedDateProduct,
+    p.SubCategoryID
 FROM NetOnNet.dbo.Product p
-JOIN NetOnNet.dbo.SubCategory sc ON sc.SubCategoryID = p.SubCategoryID
-JOIN NetOnNet.dbo.Category cat ON cat.CategoryID = sc.CategoryID;
 
 -- DimPayment
 INSERT INTO dbo.DimPayment (PaymentID, PaymentMethodName, PaymentProviderName)
