@@ -614,7 +614,7 @@
     </mxGraphModel>
   </diagram>
   <diagram name="Snowflake" id="7gEVGo9Q10pn8yoSks7A">
-    <mxGraphModel dx="2050" dy="1124" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2336" pageHeight="1654" background="none" math="0" shadow="0">
+    <mxGraphModel dx="1572" dy="1124" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2336" pageHeight="1654" background="none" math="0" shadow="0">
       <root>
         <mxCell id="1-iXFV6npy5ddnTOq3Uq-0" />
         <mxCell id="1-iXFV6npy5ddnTOq3Uq-1" parent="1-iXFV6npy5ddnTOq3Uq-0" />
@@ -798,7 +798,7 @@
             <mxRectangle height="40" width="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="5Lg0JZ1DbREs3Gl2lc2h-2" parent="5Lg0JZ1DbREs3Gl2lc2h-0" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;labelBackgroundColor=none;strokeColor=#E07A5F;fontColor=#393C56;rounded=1;" value="IsApproved BIT NPT NULL" vertex="1">
+        <mxCell id="5Lg0JZ1DbREs3Gl2lc2h-2" parent="5Lg0JZ1DbREs3Gl2lc2h-0" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;labelBackgroundColor=none;strokeColor=#E07A5F;fontColor=#393C56;rounded=1;" value="PaymentIsApproved BIT NPT NULL" vertex="1">
           <mxGeometry height="40" width="290" x="30" as="geometry">
             <mxRectangle height="40" width="290" as="alternateBounds" />
           </mxGeometry>
@@ -811,7 +811,7 @@
             <mxRectangle height="40" width="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="5Lg0JZ1DbREs3Gl2lc2h-5" parent="5Lg0JZ1DbREs3Gl2lc2h-3" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;labelBackgroundColor=none;strokeColor=#E07A5F;fontColor=#393C56;rounded=1;" value="CreatedDatePayment DATE NOT NULL" vertex="1">
+        <mxCell id="5Lg0JZ1DbREs3Gl2lc2h-5" parent="5Lg0JZ1DbREs3Gl2lc2h-3" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;labelBackgroundColor=none;strokeColor=#E07A5F;fontColor=#393C56;rounded=1;" value="PaymentCreatedDate DATETIME NOT NULL" vertex="1">
           <mxGeometry height="40" width="290" x="30" as="geometry">
             <mxRectangle height="40" width="290" as="alternateBounds" />
           </mxGeometry>
