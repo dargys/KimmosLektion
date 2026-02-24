@@ -8,8 +8,8 @@ USE NetOnNet
 GO
 
 
--- DELETE FROM dbo.[Table];
--- DBCC CHECKIDENT ('dbo.[Table]', RESEED, 0);
+-- DELETE FROM dbo.[OrderItem];
+-- DBCC CHECKIDENT ('dbo.[OrderItem]', RESEED, 0);
 
 IF OBJECT_ID ('dbo.Category','U') IS NULL
 BEGIN
@@ -37,11 +37,11 @@ CREATE TABLE dbo.Product (
     ProductID       INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
     SubCategoryID   INT NOT NULL,
     SKU             NVARCHAR(50) NOT NULL UNIQUE,
-    ProductName     NVARCHAR(100) NOT NULL,
+    ProductName     NVARCHAR(255) NOT NULL,
     Price           DECIMAL(10, 2) NOT NULL,
     Cost            DECIMAL(10, 2) NOT NULL,
     Color           NVARCHAR (20) NULL,
-    CreatedAt       DATETIME NOT NULL,
+    CreatedAt       DATETIME DEFAULT GETDATE() NOT NULL,
     ProductDetails  NVARCHAR(MAX) NULL,
     FOREIGN KEY (SubCategoryID) REFERENCES dbo.SubCategory(SubCategoryID),
     CONSTRAINT CK_ProductPrice CHECK (Price >= 0),
@@ -73,7 +73,7 @@ CREATE TABLE dbo.Payment (
     MethodName      NVARCHAR (15) NOT NULL,
     ProviderName    NVARCHAR (15) NOT NULL,
     IsApproved      BIT NOT NULL,
-    CreatedDate     DATETIME NOT NULL,
+    CreatedDate     DATETIME DEFAULT GETDATE() NOT NULL,
     CONSTRAINT CK_ValidCombination CHECK (
     (MethodName = 'Kort' AND ProviderName IN ('Visa','Mastercard')) OR
     (MethodName = 'Faktura' AND ProviderName = 'Klarna') OR
@@ -93,7 +93,7 @@ CREATE TABLE dbo.[Order] (
     OrderID         INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
     PaymentID       INT NOT NULL,
     CustomerID      INT NOT NULL,
-    OrderDate       DATETIME NOT NULL,
+    OrderDate       DATETIME DEFAULT GETDATE() NOT NULL,
     OrderStatus     NVARCHAR(20) NOT NULL,
     OrderTotalAmount DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (CustomerID) REFERENCES dbo.Customer(CustomerID),
@@ -131,7 +131,7 @@ CREATE TABLE dbo.[Return] (
     OrderItemID INT NOT NULL,
     ReturnDate  DATE NOT NULL,
     Reason      NVARCHAR(100),
-    [Status]    NVARCHAR(20) NOT NULL,
+    [Status]      NVARCHAR(20) NOT NULL,
     Notes       NVARCHAR(MAX),
     FOREIGN KEY (OrderItemID) REFERENCES dbo.OrderItem(OrderItemID),
     CONSTRAINT CK_ReturnReason CHECK (Reason IN ('Defekt', 'StämmerInte', 'Skadad', 'KundRequest', 'Övrigt')),
@@ -227,191 +227,217 @@ INSERT INTO dbo.SubCategory (CategoryID, SubCategoryName) VALUES
 
 INSERT INTO dbo.[Product] (SubCategoryID, SKU, ProductName, Price, Cost, Color, CreatedAt, ProductDetails) VALUES
 
--- Laptops (SubCategoryID 1) - 3 products - Added Q4 2023
-(1, 'DATOR-001', 'Dell XPS 13 Plus', 12999.00, 7800.00, 'Silver', '2023-10-15 08:30:00', '{"brand": "Dell", "model": "XPS 13 Plus", "warrantyYears": 2, "specifications": {"processor": "Intel Core i7-1365U", "ram": "16GB LPDDR5", "storage": "512GB NVMe SSD", "display": "13.4-inch OLED 2880x1920"}}'),
-(1, 'DATOR-002', 'HP Pavilion 15', 8999.00, 5400.00, 'Charcoal', '2023-11-02 10:15:00', '{"brand": "HP", "model": "Pavilion 15-eh1000", "warrantyYears": 1, "specifications": {"processor": "AMD Ryzen 5 7520U", "ram": "8GB DDR5", "storage": "256GB SSD", "display": "15.6-inch FHD 1920x1080"}}'),
-(1, 'DATOR-003', 'Lenovo ThinkPad X1 Carbon', 14999.00, 9000.00, 'Black', '2023-12-01 09:45:00', '{"brand": "Lenovo", "model": "ThinkPad X1 Carbon Gen 11", "warrantyYears": 3, "specifications": {"processor": "Intel Core i7-1365U", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "14-inch OLED 2880x1880"}}'),
+-- Laptops (SubCategoryID 1) - 3 products
+(1, 'DATOR-001', 'Dell XPS 13 Plus', 12999.00, 7800.00, 'Silver', GETDATE(), '{"brand": "Dell", "model": "XPS 13 Plus", "warrantyYears": 2, "specifications": {"processor": "Intel Core i7-1365U", "ram": "16GB LPDDR5", "storage": "512GB NVMe SSD", "display": "13.4-inch OLED 2880x1920"}}'),
+(1, 'DATOR-002', 'HP Pavilion 15', 8999.00, 5400.00, 'Charcoal', GETDATE(), '{"brand": "HP", "model": "Pavilion 15-eh1000", "warrantyYears": 1, "specifications": {"processor": "AMD Ryzen 5 7520U", "ram": "8GB DDR5", "storage": "256GB SSD", "display": "15.6-inch FHD 1920x1080"}}'),
+(1, 'DATOR-003', 'Lenovo ThinkPad X1 Carbon', 14999.00, 9000.00, 'Black', GETDATE(), '{"brand": "Lenovo", "model": "ThinkPad X1 Carbon Gen 11", "warrantyYears": 3, "specifications": {"processor": "Intel Core i7-1365U", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "14-inch OLED 2880x1880"}}'),
 
--- Tablets (SubCategoryID 2) - 3 products - Added Q4 2023
-(2, 'DATOR-004', 'Apple iPad Air 5', 8999.00, 5400.00, 'Space Gray', '2023-10-20 11:20:00', '{"brand": "Apple", "model": "iPad Air 5", "warrantyYears": 1, "specifications": {"processor": "Apple M1", "ram": "8GB", "storage": "256GB", "display": "10.9-inch Liquid Retina 2360x1640"}}'),
-(2, 'DATOR-005', 'Samsung Galaxy Tab S8 Ultra', 9999.00, 6000.00, 'Gray', '2023-11-05 14:30:00', '{"brand": "Samsung", "model": "Galaxy Tab S8 Ultra", "warrantyYears": 1, "specifications": {"processor": "Snapdragon 8 Gen 1", "ram": "12GB", "storage": "256GB", "display": "14.6-inch AMOLED 2960x1848"}}'),
-(2, 'DATOR-006', 'Apple iPad Pro 12.9', 14999.00, 9000.00, 'Silver', '2023-12-10 13:15:00', '{"brand": "Apple", "model": "iPad Pro 12.9-inch M2", "warrantyYears": 1, "specifications": {"processor": "Apple M2", "ram": "8GB", "storage": "256GB", "display": "12.9-inch Liquid Retina XDR 2732x2048"}}'),
+-- Tablets (SubCategoryID 2) - 3 products
+(2, 'DATOR-004', 'Apple iPad Air 5', 8999.00, 5400.00, 'Space Gray', GETDATE(), '{"brand": "Apple", "model": "iPad Air 5", "warrantyYears": 1, "specifications": {"processor": "Apple M1", "ram": "8GB", "storage": "256GB", "display": "10.9-inch Liquid Retina 2360x1640"}}'),
+(2, 'DATOR-005', 'Samsung Galaxy Tab S8 Ultra', 9999.00, 6000.00, 'Gray', GETDATE(), '{"brand": "Samsung", "model": "Galaxy Tab S8 Ultra", "warrantyYears": 1, "specifications": {"processor": "Snapdragon 8 Gen 1", "ram": "12GB", "storage": "256GB", "display": "14.6-inch AMOLED 2960x1848"}}'),
+(2, 'DATOR-006', 'Apple iPad Pro 12.9', 14999.00, 9000.00, 'Silver', GETDATE(), '{"brand": "Apple", "model": "iPad Pro 12.9-inch M2", "warrantyYears": 1, "specifications": {"processor": "Apple M2", "ram": "8GB", "storage": "256GB", "display": "12.9-inch Liquid Retina XDR 2732x2048"}}'),
 
--- Ultrabooks (SubCategoryID 3) - 3 products - Added Q4 2023 & Jan 2024
-(3, 'DATOR-007', 'MacBook Air M2', 15999.00, 9600.00, 'Space Gray', '2023-09-18 09:00:00', '{"brand": "Apple", "model": "MacBook Air M2", "warrantyYears": 1, "specifications": {"processor": "Apple M2", "ram": "16GB Unified Memory", "storage": "512GB SSD", "display": "13.6-inch Liquid Retina 2560x1600"}}'),
-(3, 'DATOR-008', 'Microsoft Surface Laptop 5', 13499.00, 8100.00, 'Platinum', '2023-10-25 15:45:00', '{"brand": "Microsoft", "model": "Surface Laptop 5", "warrantyYears": 2, "specifications": {"processor": "Intel Core i7-1285U", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "13.5-inch PixelSense 2256x1504"}}'),
-(3, 'DATOR-009', 'ASUS ZenBook 14', 9999.00, 6000.00, 'Icy Silver', '2024-01-08 12:30:00', '{"brand": "ASUS", "model": "ZenBook 14 OLED", "warrantyYears": 2, "specifications": {"processor": "Intel Core i7-1360P", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "14-inch OLED 2880x1800"}}'),
+-- Ultrabooks (SubCategoryID 3) - 3 products
+(3, 'DATOR-007', 'MacBook Air M2', 15999.00, 9600.00, 'Space Gray', GETDATE(), '{"brand": "Apple", "model": "MacBook Air M2", "warrantyYears": 1, "specifications": {"processor": "Apple M2", "ram": "16GB Unified Memory", "storage": "512GB SSD", "display": "13.6-inch Liquid Retina 2560x1600"}}'),
+(3, 'DATOR-008', 'Microsoft Surface Laptop 5', 13499.00, 8100.00, 'Platinum', GETDATE(), '{"brand": "Microsoft", "model": "Surface Laptop 5", "warrantyYears": 2, "specifications": {"processor": "Intel Core i7-1285U", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "13.5-inch PixelSense 2256x1504"}}'),
+(3, 'DATOR-009', 'ASUS ZenBook 14', 9999.00, 6000.00, 'Icy Silver', GETDATE(), '{"brand": "ASUS", "model": "ZenBook 14 OLED", "warrantyYears": 2, "specifications": {"processor": "Intel Core i7-1360P", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "14-inch OLED 2880x1800"}}'),
 
--- 2-in-1 Devices (SubCategoryID 4) - 2 products - Added Q4 2023
-(4, 'DATOR-010', 'Microsoft Surface Pro 9', 11999.00, 7200.00, 'Platinum', '2023-11-12 10:20:00', '{"brand": "Microsoft", "model": "Surface Pro 9", "warrantyYears": 1, "specifications": {"processor": "Intel Core i7-1255U", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "13-inch PixelSense 2880x1920"}}'),
-(4, 'DATOR-011', 'Lenovo Yoga 9i', 10999.00, 6600.00, 'Oatmeal', '2023-12-18 14:50:00', '{"brand": "Lenovo", "model": "Yoga 9i Gen 7", "warrantyYears": 2, "specifications": {"processor": "Intel Core i7-1360P", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "14-inch IPS touchscreen 2240x1400"}}'),
-
-
--- CPUs (SubCategoryID 5) - 2 products
-(5, 'COMP-001', 'Intel Core i7-13700K', 4999.00, 3000.00, NULL, '2023-10-01 08:00:00', '{"brand": "Intel", "model": "Core i7-13700K", "warrantyYears": 3, "specifications": {"cores": "16 cores (8P+8E)", "frequency": "3.4-5.4 GHz", "tdp": "125W", "socket": "LGA1700"}}'),
-(5, 'COMP-002', 'AMD Ryzen 7 7700X', 4499.00, 2700.00, NULL, '2023-10-10 09:30:00', '{"brand": "AMD", "model": "Ryzen 7 7700X", "warrantyYears": 3, "specifications": {"cores": "8 cores", "frequency": "4.5-5.4 GHz", "tdp": "105W", "socket": "AM5"}}'),
-
--- GPUs (SubCategoryID 6) - 2 products
-(6, 'COMP-003', 'NVIDIA RTX 4080', 12999.00, 7800.00, NULL, '2023-10-05 10:15:00', '{"brand": "NVIDIA", "model": "GeForce RTX 4080", "warrantyYears": 2, "specifications": {"memory": "16GB GDDR6X", "cuda_cores": "9728", "memory_bandwidth": "576 GB/s", "power_consumption": "320W"}}'),
-(6, 'COMP-004', 'AMD RX 7900 XTX', 11999.00, 7200.00, NULL, '2023-11-08 11:45:00', '{"brand": "AMD", "model": "Radeon RX 7900 XTX", "warrantyYears": 2, "specifications": {"memory": "24GB GDDR6", "stream_processors": "6144", "memory_bandwidth": "576 GB/s", "power_consumption": "420W"}}'),
-
--- RAM Memory (SubCategoryID 7) - 2 products
-(7, 'COMP-005', 'Corsair Vengeance DDR5 32GB', 2499.00, 1500.00, NULL, '2023-09-20 13:00:00', '{"brand": "Corsair", "model": "Vengeance DDR5", "warrantyYears": 1, "specifications": {"capacity": "32GB (2x16GB)", "speed": "5600MHz", "cas_latency": "CL36", "voltage": "1.25V"}}'),
-(7, 'COMP-006', 'G.Skill Trident Z5 64GB', 4999.00, 3000.00, NULL, '2023-11-22 14:20:00', '{"brand": "G.Skill", "model": "Trident Z5", "warrantyYears": 1, "specifications": {"capacity": "64GB (2x32GB)", "speed": "6000MHz", "cas_latency": "CL30", "voltage": "1.4V"}}'),
-
-
--- Consoles (SubCategoryID 10) - 3 products
-(10, 'GAME-001', 'PlayStation 5', 5999.00, 3600.00, 'White', '2023-08-15 09:00:00', '{"brand": "Sony", "model": "PlayStation 5", "warrantyYears": 2, "specifications": {"processor": "AMD Zen 2 8-core 3.5 GHz", "memory": "16GB GDDR6", "storage": "825GB SSD", "resolution": "Up to 4K 120fps"}}'),
-(10, 'GAME-002', 'Xbox Series X', 5499.00, 3300.00, 'Black', '2023-08-20 10:30:00', '{"brand": "Microsoft", "model": "Xbox Series X", "warrantyYears": 2, "specifications": {"processor": "AMD Zen 2 8-core 3.8 GHz", "memory": "16GB GDDR6", "storage": "1TB SSD", "resolution": "Up to 4K 120fps"}}'),
-(10, 'GAME-003', 'Nintendo Switch OLED', 3999.00, 2400.00, 'White', '2023-09-10 11:15:00', '{"brand": "Nintendo", "model": "Switch OLED Model", "warrantyYears": 1, "specifications": {"processor": "NVIDIA Tegra X1", "memory": "4GB LPDDR4", "storage": "64GB", "display": "7-inch OLED 1280x720"}}'),
-
--- Gaming Monitors (SubCategoryID 11) - 2 products
-(11, 'GAME-004', 'ASUS ROG Swift PG279QM', 4999.00, 3000.00, 'Black', '2023-10-12 12:45:00', '{"brand": "ASUS", "model": "ROG Swift PG279QM", "warrantyYears": 2, "specifications": {"size": "27 inch", "resolution": "2560x1440 QHD", "refresh_rate": "240Hz", "response_time": "1ms GTG"}}'),
-(11, 'GAME-005', 'LG UltraGear 32GN750', 5999.00, 3600.00, 'Black', '2023-11-15 14:00:00', '{"brand": "LG", "model": "UltraGear 32GN750-B", "warrantyYears": 2, "specifications": {"size": "32 inch", "resolution": "2560x1440 QHD", "refresh_rate": "240Hz", "response_time": "1ms GTG"}}'),
-
--- Gaming Keyboards (SubCategoryID 12) - 2 products
-(12, 'GAME-006', 'Corsair K95 Platinum XT', 1999.00, 1200.00, 'Black', '2023-09-25 08:30:00', '{"brand": "Corsair", "model": "K95 Platinum XT", "warrantyYears": 2, "specifications": {"switches": "Cherry MX Red", "layout": "Full Size 104-key", "backlighting": "RGB per-key", "connection": "Wired USB"}}'),
-(12, 'GAME-007', 'Razer BlackWidow V4', 1699.00, 1020.00, 'Black', '2023-10-08 09:15:00', '{"brand": "Razer", "model": "BlackWidow V4", "warrantyYears": 2, "specifications": {"switches": "Razer Green", "layout": "Full Size 104-key", "backlighting": "RGB per-key", "connection": "Wired USB"}}'),
-
--- Gaming Mice (SubCategoryID 13) - 3 products
-(13, 'GAME-008', 'Logitech G Pro X Superlight 2', 999.00, 600.00, 'Black', '2023-09-30 10:00:00', '{"brand": "Logitech", "model": "G Pro X Superlight 2", "warrantyYears": 2, "specifications": {"sensor": "HERO 25K", "dpi": "25600", "weight": "63g", "connectivity": "Wireless 2.4GHz"}}'),
-(13, 'GAME-009', 'Razer DeathAdder V3', 899.00, 540.00, 'Black', '2023-10-18 11:20:00', '{"brand": "Razer", "model": "DeathAdder V3", "warrantyYears": 2, "specifications": {"sensor": "Focus Pro 30K", "dpi": "30000", "weight": "63g", "connectivity": "Wired USB"}}'),
-(13, 'GAME-010', 'SteelSeries Rival 5', 799.00, 480.00, 'Black', '2023-11-01 12:30:00', '{"brand": "SteelSeries", "model": "Rival 5", "warrantyYears": 1, "specifications": {"sensor": "TrueMove Core", "dpi": "18000", "weight": "78g", "connectivity": "Wired USB"}}'),
-
-
--- Smart Home (SubCategoryID 14) - 2 products
-(14, 'HOME-001', 'Google Nest Hub Max', 2499.00, 1500.00, 'Charcoal', '2023-09-05 08:45:00', '{"brand": "Google", "model": "Nest Hub Max", "warrantyYears": 1, "specifications": {"display": "10 inch touchscreen", "resolution": "2200x1600", "connectivity": "WiFi 5 802.11ac", "assistant": "Google Assistant"}}'),
-(14, 'HOME-002', 'Amazon Echo Show 15', 1999.00, 1200.00, 'Black', '2023-10-22 13:30:00', '{"brand": "Amazon", "model": "Echo Show 15", "warrantyYears": 1, "specifications": {"display": "15.6 inch touchscreen", "resolution": "1920x1080", "connectivity": "WiFi 6 802.11ax", "assistant": "Alexa"}}'),
-
--- Sports Equipment (SubCategoryID 15) - 2 products
-(15, 'HOME-003', 'Fitbit Charge 5', 1499.00, 900.00, 'Black', '2023-08-10 09:30:00', '{"brand": "Fitbit", "model": "Charge 5", "warrantyYears": 1, "specifications": {"display": "AMOLED touchscreen", "battery": "7 days", "water_resistance": "50m", "sensors": "heart rate, SpO2, EDA"}}'),
-(15, 'HOME-004', 'Apple Watch Series 8', 3999.00, 2400.00, 'Silver', '2023-09-22 14:15:00', '{"brand": "Apple", "model": "Watch Series 8 45mm", "warrantyYears": 1, "specifications": {"display": "Retina LTPO OLED", "battery": "18 hours", "water_resistance": "50m", "sensors": "ECG, temperature, blood oxygen"}}'),
-
--- Furniture (SubCategoryID 16) - 1 product
-(16, 'HOME-005', 'IKEA LINNMON Desk', 999.00, 600.00, NULL, '2023-07-18 10:00:00', '{"brand": "IKEA", "model": "LINNMON", "warrantyYears": 1, "specifications": {"material": "particle board veneer", "size": "140x60 cm", "height_adjustable": "no", "load_capacity": "50 kg"}}'),
-
--- Lighting (SubCategoryID 17) - 1 product
-(17, 'HOME-006', 'Philips Hue Smart Bulbs', 1299.00, 780.00, 'White', '2023-08-28 11:45:00', '{"brand": "Philips", "model": "Hue White A19", "warrantyYears": 2, "specifications": {"brightness": "1600 lumens", "color_temperature": "2700K 6500K", "connectivity": "Bluetooth ZigBee", "lifespan": "25000 hours"}}'),
-
-
--- Hair Care (SubCategoryID 18) - 2 products
-(18, 'CARE-001', 'Dyson SuperSonic Hair Dryer', 3999.00, 2400.00, 'Platinum', '2023-07-12 08:00:00', '{"brand": "Dyson", "model": "SuperSonic", "warrantyYears": 2, "specifications": {"power": "1600W", "air_speed": "40 mph", "heat_levels": "3", "ionic_technology": "yes"}}'),
-(18, 'CARE-002', 'GHD Platinum+ Hair Styler', 1999.00, 1200.00, 'Black', '2023-08-05 09:20:00', '{"brand": "GHD", "model": "Platinum+ Styler", "warrantyYears": 2, "specifications": {"plate_width": "28mm", "heat_levels": "5", "temperature_range": "140-365F", "plate_technology": "Dual-zone"}}'),
-
--- Skincare (SubCategoryID 19) - 2 products
-(19, 'CARE-003', 'Clarisonic Mia Smart', 1299.00, 780.00, 'Rose Gold', '2023-06-15 10:30:00', '{"brand": "Clarisonic", "model": "Mia Smart", "warrantyYears": 1, "specifications": {"frequency": "300 oscillations/sec", "brush_types": "sensitive, normal, deep", "battery": "22 uses per charge", "waterproof": "IPX7"}}'),
-(19, 'CARE-004', 'NuFace Trinity Pro', 699.00, 420.00, 'Rose Gold', '2023-07-08 11:15:00', '{"brand": "NuFace", "model": "Trinity PRO", "warrantyYears": 1, "specifications": {"microcurrent": "yes", "treatment_time": "5 minutes", "attachments": "facial, lips, eye", "battery": "2-3 hours"}}'),
-
--- Health Devices (SubCategoryID 20) - 1 product
-(20, 'CARE-005', 'Withings Body+ Smart Scale', 1299.00, 780.00, 'Black', '2023-05-20 12:45:00', '{"brand": "Withings", "model": "Body+", "warrantyYears": 2, "specifications": {"measurements": "weight, BMI, water%, muscle mass", "connectivity": "WiFi Bluetooth", "max_weight": "180kg", "accuracy": "0.1kg"}}'),
-
-
--- OLED TV (SubCategoryID 21) - 2 products
-(21, 'TV-001', 'LG OLED55C3PUA 55"', 9999.00, 6000.00, 'Black', '2023-11-20 08:30:00', '{"brand": "LG", "model": "OLED55C3PUA", "warrantyYears": 2, "specifications": {"size": "55 inch", "resolution": "4K OLED 3840x2160", "refresh_rate": "120Hz", "brightness": "200 nits peak"}}'),
-(21, 'TV-002', 'Sony K-55XR80 55"', 11999.00, 7200.00, 'Black', '2023-12-05 09:45:00', '{"brand": "Sony", "model": "K-55XR80", "warrantyYears": 3, "specifications": {"size": "55 inch", "resolution": "4K Mini-LED 3840x2160", "refresh_rate": "120Hz", "brightness": "3000 nits peak"}}'),
-
--- LED TV (SubCategoryID 22) - 3 products
-(22, 'TV-003', 'Samsung QN55Q80C 55"', 7999.00, 4800.00, 'Black', '2023-10-28 10:20:00', '{"brand": "Samsung", "model": "QN55Q80C", "warrantyYears": 2, "specifications": {"size": "55 inch", "resolution": "4K QLED 3840x2160", "refresh_rate": "120Hz", "brightness": "2500 nits peak"}}'),
-(22, 'TV-004', 'TCL 65\" 4K Smart TV', 4999.00, 3000.00, 'Black', '2023-09-15 11:30:00', '{"brand": "TCL", "model": "65Q640", "warrantyYears": 1, "specifications": {"size": "65 inch", "resolution": "4K LED 3840x2160", "refresh_rate": "60Hz", "smart_platform": "Google TV"}}'),
-(22, 'TV-005', 'Hisense 55" 4K Smart TV', 3999.00, 2400.00, 'Black', '2023-08-30 12:15:00', '{"brand": "Hisense", "model": "55A6G", "warrantyYears": 1, "specifications": {"size": "55 inch", "resolution": "4K LED 3840x2160", "refresh_rate": "60Hz", "smart_platform": "Android TV"}}'),
-
--- Smart TV (SubCategoryID 23) - 3 products
-(23, 'TV-006', 'Samsung QN65Q90D 65"', 12999.00, 7800.00, 'Black', '2023-11-30 13:00:00', '{"brand": "Samsung", "model": "QN65Q90D", "warrantyYears": 2, "specifications": {"size": "65 inch", "resolution": "4K QLED 3840x2160", "refresh_rate": "144Hz", "brightness": "3000 nits peak"}}'),
-(23, 'TV-007', 'LG 65UP7550 65"', 8999.00, 5400.00, 'Black', '2023-10-18 14:20:00', '{"brand": "LG", "model": "65UP7550", "warrantyYears": 2, "specifications": {"size": "65 inch", "resolution": "4K LED 3840x2160", "refresh_rate": "60Hz", "smart_platform": "webOS"}}'),
-(23, 'TV-008', 'Panasonic 55HX950 55"', 6999.00, 4200.00, 'Black', '2023-09-25 15:30:00', '{"brand": "Panasonic", "model": "55HX950", "warrantyYears": 2, "specifications": {"size": "55 inch", "resolution": "4K LED 3840x2160", "refresh_rate": "60Hz", "smart_platform": "my Home Screen"}}'),
+-- 2-in-1 Devices (SubCategoryID 4) - 2 products
+(4, 'DATOR-010', 'Microsoft Surface Pro 9', 11999.00, 7200.00, 'Platinum', GETDATE(), '{"brand": "Microsoft", "model": "Surface Pro 9", "warrantyYears": 1, "specifications": {"processor": "Intel Core i7-1255U", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "13-inch PixelSense 2880x1920"}}'),
+(4, 'DATOR-011', 'Lenovo Yoga 9i', 10999.00, 6600.00, 'Oatmeal', GETDATE(), '{"brand": "Lenovo", "model": "Yoga 9i Gen 7", "warrantyYears": 2, "specifications": {"processor": "Intel Core i7-1360P", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "14-inch IPS touchscreen 2240x1400"}}'),
 
 -- ========================================
--- LJUD (8 products) - Added throughout 2023 & 2024
+-- DATORKOMPONENTER (8 products)
+-- ========================================
+
+-- CPUs (SubCategoryID 5) - 2 products
+(5, 'COMP-001', 'Intel Core i7-13700K', 4999.00, 3000.00, NULL, GETDATE(), '{"brand": "Intel", "model": "Core i7-13700K", "warrantyYears": 3, "specifications": {"cores": "16 cores (8P+8E)", "frequency": "3.4-5.4 GHz", "tdp": "125W", "socket": "LGA1700"}}'),
+(5, 'COMP-002', 'AMD Ryzen 7 7700X', 4499.00, 2700.00, NULL, GETDATE(), '{"brand": "AMD", "model": "Ryzen 7 7700X", "warrantyYears": 3, "specifications": {"cores": "8 cores", "frequency": "4.5-5.4 GHz", "tdp": "105W", "socket": "AM5"}}'),
+
+-- GPUs (SubCategoryID 6) - 2 products
+(6, 'COMP-003', 'NVIDIA RTX 4080', 12999.00, 7800.00, NULL, GETDATE(), '{"brand": "NVIDIA", "model": "GeForce RTX 4080", "warrantyYears": 2, "specifications": {"memory": "16GB GDDR6X", "cuda_cores": "9728", "memory_bandwidth": "576 GB/s", "power_consumption": "320W"}}'),
+(6, 'COMP-004', 'AMD RX 7900 XTX', 11999.00, 7200.00, NULL, GETDATE(), '{"brand": "AMD", "model": "Radeon RX 7900 XTX", "warrantyYears": 2, "specifications": {"memory": "24GB GDDR6", "stream_processors": "6144", "memory_bandwidth": "576 GB/s", "power_consumption": "420W"}}'),
+
+-- RAM Memory (SubCategoryID 7) - 2 products
+(7, 'COMP-005', 'Corsair Vengeance DDR5 32GB', 2499.00, 1500.00, NULL, GETDATE(), '{"brand": "Corsair", "model": "Vengeance DDR5", "warrantyYears": 1, "specifications": {"capacity": "32GB (2x16GB)", "speed": "5600MHz", "cas_latency": "CL36", "voltage": "1.25V"}}'),
+(7, 'COMP-006', 'G.Skill Trident Z5 64GB', 4999.00, 3000.00, NULL, GETDATE(), '{"brand": "G.Skill", "model": "Trident Z5", "warrantyYears": 1, "specifications": {"capacity": "64GB (2x32GB)", "speed": "6000MHz", "cas_latency": "CL30", "voltage": "1.4V"}}'),
+
+-- ========================================
+-- GAMING (10 products)
+-- ========================================
+
+-- Consoles (SubCategoryID 10) - 3 products
+(10, 'GAME-001', 'PlayStation 5', 5999.00, 3600.00, 'White', GETDATE(), '{"brand": "Sony", "model": "PlayStation 5", "warrantyYears": 2, "specifications": {"processor": "AMD Zen 2 8-core 3.5 GHz", "memory": "16GB GDDR6", "storage": "825GB SSD", "resolution": "Up to 4K 120fps"}}'),
+(10, 'GAME-002', 'Xbox Series X', 5499.00, 3300.00, 'Black', GETDATE(), '{"brand": "Microsoft", "model": "Xbox Series X", "warrantyYears": 2, "specifications": {"processor": "AMD Zen 2 8-core 3.8 GHz", "memory": "16GB GDDR6", "storage": "1TB SSD", "resolution": "Up to 4K 120fps"}}'),
+(10, 'GAME-003', 'Nintendo Switch OLED', 3999.00, 2400.00, 'White', GETDATE(), '{"brand": "Nintendo", "model": "Switch OLED Model", "warrantyYears": 1, "specifications": {"processor": "NVIDIA Tegra X1", "memory": "4GB LPDDR4", "storage": "64GB", "display": "7-inch OLED 1280x720"}}'),
+
+-- Gaming Monitors (SubCategoryID 11) - 2 products
+(11, 'GAME-004', 'ASUS ROG Swift PG279QM', 4999.00, 3000.00, 'Black', GETDATE(), '{"brand": "ASUS", "model": "ROG Swift PG279QM", "warrantyYears": 2, "specifications": {"size": "27 inch", "resolution": "2560x1440 QHD", "refresh_rate": "240Hz", "response_time": "1ms GTG"}}'),
+(11, 'GAME-005', 'LG UltraGear 32GN750', 5999.00, 3600.00, 'Black', GETDATE(), '{"brand": "LG", "model": "UltraGear 32GN750-B", "warrantyYears": 2, "specifications": {"size": "32 inch", "resolution": "2560x1440 QHD", "refresh_rate": "240Hz", "response_time": "1ms GTG"}}'),
+
+-- Gaming Keyboards (SubCategoryID 12) - 2 products
+(12, 'GAME-006', 'Corsair K95 Platinum XT', 1999.00, 1200.00, 'Black', GETDATE(), '{"brand": "Corsair", "model": "K95 Platinum XT", "warrantyYears": 2, "specifications": {"switches": "Cherry MX Red", "layout": "Full Size 104-key", "backlighting": "RGB per-key", "connection": "Wired USB"}}'),
+(12, 'GAME-007', 'Razer BlackWidow V4', 1699.00, 1020.00, 'Black', GETDATE(), '{"brand": "Razer", "model": "BlackWidow V4", "warrantyYears": 2, "specifications": {"switches": "Razer Green", "layout": "Full Size 104-key", "backlighting": "RGB per-key", "connection": "Wired USB"}}'),
+
+-- Gaming Mice (SubCategoryID 13) - 3 products
+(13, 'GAME-008', 'Logitech G Pro X Superlight 2', 999.00, 600.00, 'Black', GETDATE(), '{"brand": "Logitech", "model": "G Pro X Superlight 2", "warrantyYears": 2, "specifications": {"sensor": "HERO 25K", "dpi": "25600", "weight": "63g", "connectivity": "Wireless 2.4GHz"}}'),
+(13, 'GAME-009', 'Razer DeathAdder V3', 899.00, 540.00, 'Black', GETDATE(), '{"brand": "Razer", "model": "DeathAdder V3", "warrantyYears": 2, "specifications": {"sensor": "Focus Pro 30K", "dpi": "30000", "weight": "63g", "connectivity": "Wired USB"}}'),
+(13, 'GAME-010', 'SteelSeries Rival 5', 799.00, 480.00, 'Black', GETDATE(), '{"brand": "SteelSeries", "model": "Rival 5", "warrantyYears": 1, "specifications": {"sensor": "TrueMove Core", "dpi": "18000", "weight": "78g", "connectivity": "Wired USB"}}'),
+
+-- ========================================
+-- HEM & FRITID (6 products)
+-- ========================================
+
+-- Smart Home (SubCategoryID 14) - 2 products
+(14, 'HOME-001', 'Google Nest Hub Max', 2499.00, 1500.00, 'Charcoal', GETDATE(), '{"brand": "Google", "model": "Nest Hub Max", "warrantyYears": 1, "specifications": {"display": "10 inch touchscreen", "resolution": "2200x1600", "connectivity": "WiFi 5 802.11ac", "assistant": "Google Assistant"}}'),
+(14, 'HOME-002', 'Amazon Echo Show 15', 1999.00, 1200.00, 'Black', GETDATE(), '{"brand": "Amazon", "model": "Echo Show 15", "warrantyYears": 1, "specifications": {"display": "15.6 inch touchscreen", "resolution": "1920x1080", "connectivity": "WiFi 6 802.11ax", "assistant": "Alexa"}}'),
+
+-- Sports Equipment (SubCategoryID 15) - 2 products
+(15, 'HOME-003', 'Fitbit Charge 5', 1499.00, 900.00, 'Black', GETDATE(), '{"brand": "Fitbit", "model": "Charge 5", "warrantyYears": 1, "specifications": {"display": "AMOLED touchscreen", "battery": "7 days", "water_resistance": "50m", "sensors": "heart rate, SpO2, EDA"}}'),
+(15, 'HOME-004', 'Apple Watch Series 8', 3999.00, 2400.00, 'Silver', GETDATE(), '{"brand": "Apple", "model": "Watch Series 8 45mm", "warrantyYears": 1, "specifications": {"display": "Retina LTPO OLED", "battery": "18 hours", "water_resistance": "50m", "sensors": "ECG, temperature, blood oxygen"}}'),
+
+-- Furniture (SubCategoryID 16) - 1 product
+(16, 'HOME-005', 'IKEA LINNMON Desk', 999.00, 600.00, NULL, GETDATE(), '{"brand": "IKEA", "model": "LINNMON", "warrantyYears": 1, "specifications": {"material": "particle board veneer", "size": "140x60 cm", "height_adjustable": "no", "load_capacity": "50 kg"}}'),
+
+-- Lighting (SubCategoryID 17) - 1 product
+(17, 'HOME-006', 'Philips Hue Smart Bulbs', 1299.00, 780.00, 'White', GETDATE(), '{"brand": "Philips", "model": "Hue White A19", "warrantyYears": 2, "specifications": {"brightness": "1600 lumens", "color_temperature": "2700K 6500K", "connectivity": "Bluetooth ZigBee", "lifespan": "25000 hours"}}'),
+
+-- ========================================
+-- PERSONVÅRD (5 products)
+-- ========================================
+
+-- Hair Care (SubCategoryID 18) - 2 products
+(18, 'CARE-001', 'Dyson SuperSonic Hair Dryer', 3999.00, 2400.00, 'Platinum', GETDATE(), '{"brand": "Dyson", "model": "SuperSonic", "warrantyYears": 2, "specifications": {"power": "1600W", "air_speed": "40 mph", "heat_levels": "3", "ionic_technology": "yes"}}'),
+(18, 'CARE-002', 'GHD Platinum+ Hair Styler', 1999.00, 1200.00, 'Black', GETDATE(), '{"brand": "GHD", "model": "Platinum+ Styler", "warrantyYears": 2, "specifications": {"plate_width": "28mm", "heat_levels": "5", "temperature_range": "140-365F", "plate_technology": "Dual-zone"}}'),
+
+-- Skincare (SubCategoryID 19) - 2 products
+(19, 'CARE-003', 'Clarisonic Mia Smart', 1299.00, 780.00, 'Rose Gold', GETDATE(), '{"brand": "Clarisonic", "model": "Mia Smart", "warrantyYears": 1, "specifications": {"frequency": "300 oscillations/sec", "brush_types": "sensitive, normal, deep", "battery": "22 uses per charge", "waterproof": "IPX7"}}'),
+(19, 'CARE-004', 'NuFace Trinity Pro', 699.00, 420.00, 'Rose Gold', GETDATE(), '{"brand": "NuFace", "model": "Trinity PRO", "warrantyYears": 1, "specifications": {"microcurrent": "yes", "treatment_time": "5 minutes", "attachments": "facial, lips, eye", "battery": "2-3 hours"}}'),
+
+-- Health Devices (SubCategoryID 20) - 1 product
+(20, 'CARE-005', 'Withings Body+ Smart Scale', 1299.00, 780.00, 'Black', GETDATE(), '{"brand": "Withings", "model": "Body+", "warrantyYears": 2, "specifications": {"measurements": "weight, BMI, water%, muscle mass", "connectivity": "WiFi Bluetooth", "max_weight": "180kg", "accuracy": "0.1kg"}}'),
+
+-- ========================================
+-- TV (8 products)
+-- ========================================
+
+-- OLED TV (SubCategoryID 21) - 2 products
+(21, 'TV-001', 'LG OLED55C3PUA 55"', 9999.00, 6000.00, 'Black', GETDATE(), '{"brand": "LG", "model": "OLED55C3PUA", "warrantyYears": 2, "specifications": {"size": "55 inch", "resolution": "4K OLED 3840x2160", "refresh_rate": "120Hz", "brightness": "200 nits peak"}}'),
+(21, 'TV-002', 'Sony K-55XR80 55"', 11999.00, 7200.00, 'Black', GETDATE(), '{"brand": "Sony", "model": "K-55XR80", "warrantyYears": 3, "specifications": {"size": "55 inch", "resolution": "4K Mini-LED 3840x2160", "refresh_rate": "120Hz", "brightness": "3000 nits peak"}}'),
+
+-- LED TV (SubCategoryID 22) - 3 products
+(22, 'TV-003', 'Samsung QN55Q80C 55"', 7999.00, 4800.00, 'Black', GETDATE(), '{"brand": "Samsung", "model": "QN55Q80C", "warrantyYears": 2, "specifications": {"size": "55 inch", "resolution": "4K QLED 3840x2160", "refresh_rate": "120Hz", "brightness": "2500 nits peak"}}'),
+(22, 'TV-004', 'TCL 65\" 4K Smart TV', 4999.00, 3000.00, 'Black', GETDATE(), '{"brand": "TCL", "model": "65Q640", "warrantyYears": 1, "specifications": {"size": "65 inch", "resolution": "4K LED 3840x2160", "refresh_rate": "60Hz", "smart_platform": "Google TV"}}'),
+(22, 'TV-005', 'Hisense 55" 4K Smart TV', 3999.00, 2400.00, 'Black', GETDATE(), '{"brand": "Hisense", "model": "55A6G", "warrantyYears": 1, "specifications": {"size": "55 inch", "resolution": "4K LED 3840x2160", "refresh_rate": "60Hz", "smart_platform": "Android TV"}}'),
+
+-- Smart TV (SubCategoryID 23) - 3 products
+(23, 'TV-006', 'Samsung QN65Q90D 65"', 12999.00, 7800.00, 'Black', GETDATE(), '{"brand": "Samsung", "model": "QN65Q90D", "warrantyYears": 2, "specifications": {"size": "65 inch", "resolution": "4K QLED 3840x2160", "refresh_rate": "144Hz", "brightness": "3000 nits peak"}}'),
+(23, 'TV-007', 'LG 65UP7550 65"', 8999.00, 5400.00, 'Black', GETDATE(), '{"brand": "LG", "model": "65UP7550", "warrantyYears": 2, "specifications": {"size": "65 inch", "resolution": "4K LED 3840x2160", "refresh_rate": "60Hz", "smart_platform": "webOS"}}'),
+(23, 'TV-008', 'Panasonic 55HX950 55"', 6999.00, 4200.00, 'Black', GETDATE(), '{"brand": "Panasonic", "model": "55HX950", "warrantyYears": 2, "specifications": {"size": "55 inch", "resolution": "4K LED 3840x2160", "refresh_rate": "60Hz", "smart_platform": "my Home Screen"}}'),
+
+-- ========================================
+-- LJUD (8 products)
 -- ========================================
 
 -- Speakers (SubCategoryID 24) - 3 products
-(24, 'AUDIO-001', 'Bose SoundLink Max', 2999.00, 1800.00, 'Black', '2023-07-20 08:45:00', '{"brand": "Bose", "model": "SoundLink Max", "warrantyYears": 1, "specifications": {"power": "60W", "battery": "20 hours", "connectivity": "Bluetooth 5.3 WiFi", "water_resistance": "IPX7"}}'),
-(24, 'AUDIO-002', 'Marshall Stanmore III', 1999.00, 1200.00, 'Black', '2023-08-12 09:30:00', '{"brand": "Marshall", "model": "Stanmore III", "warrantyYears": 2, "specifications": {"power": "80W RMS", "drivers": "dual woofer dual tweeter", "connectivity": "Bluetooth RCA 3.5mm", "dimensions": "560x380x250mm"}}'),
-(24, 'AUDIO-003', 'Harman Kardon Onyx Studio 7', 1499.00, 900.00, 'Black', '2023-09-08 10:15:00', '{"brand": "Harman Kardon", "model": "Onyx Studio 7", "warrantyYears": 2, "specifications": {"power": "110W RMS", "drivers": "50mm woofers", "connectivity": "Bluetooth Aux Optical", "design": "Premium wool mesh"}}'),
+(24, 'AUDIO-001', 'Bose SoundLink Max', 2999.00, 1800.00, 'Black', GETDATE(), '{"brand": "Bose", "model": "SoundLink Max", "warrantyYears": 1, "specifications": {"power": "60W", "battery": "20 hours", "connectivity": "Bluetooth 5.3 WiFi", "water_resistance": "IPX7"}}'),
+(24, 'AUDIO-002', 'Marshall Stanmore III', 1999.00, 1200.00, 'Black', GETDATE(), '{"brand": "Marshall", "model": "Stanmore III", "warrantyYears": 2, "specifications": {"power": "80W RMS", "drivers": "dual woofer dual tweeter", "connectivity": "Bluetooth RCA 3.5mm", "dimensions": "560x380x250mm"}}'),
+(24, 'AUDIO-003', 'Harman Kardon Onyx Studio 7', 1499.00, 900.00, 'Black', GETDATE(), '{"brand": "Harman Kardon", "model": "Onyx Studio 7", "warrantyYears": 2, "specifications": {"power": "110W RMS", "drivers": "50mm woofers", "connectivity": "Bluetooth Aux Optical", "design": "Premium wool mesh"}}'),
 
 -- Headphones (SubCategoryID 25) - 4 products
-(25, 'AUDIO-004', 'Sony WH-1000XM5', 3699.00, 2220.00, 'Black', '2023-06-10 11:00:00', '{"brand": "Sony", "model": "WH-1000XM5", "warrantyYears": 1, "specifications": {"noise_cancellation": "industry-leading ANC", "battery": "30 hours", "driver_size": "40mm", "connectivity": "Bluetooth 5.3"}}'),
-(25, 'AUDIO-005', 'Bose QuietComfort 45', 3499.00, 2100.00, 'Black', '2023-07-05 12:20:00', '{"brand": "Bose", "model": "QuietComfort 45", "warrantyYears": 1, "specifications": {"noise_cancellation": "dual-microphone ANC", "battery": "24 hours", "driver_type": "custom transducers", "connectivity": "Bluetooth USB-C"}}'),
-(25, 'AUDIO-006', 'Apple AirPods Pro Max', 4999.00, 3000.00, 'Silver', '2023-09-12 13:45:00', '{"brand": "Apple", "model": "AirPods Pro Max", "warrantyYears": 1, "specifications": {"noise_cancellation": "Active Noise Cancellation", "battery": "20 hours", "audio": "Spatial audio with Dolby Atmos", "drivers": "40mm custom drivers"}}'),
-(25, 'AUDIO-007', 'Sennheiser Momentum 4', 2999.00, 1800.00, 'Black', '2023-08-18 14:30:00', '{"brand": "Sennheiser", "model": "Momentum 4", "warrantyYears": 2, "specifications": {"noise_cancellation": "Adaptive NC", "battery": "60 hours", "driver_size": "42mm", "connectivity": "Bluetooth 5.3"}}'),
+(25, 'AUDIO-004', 'Sony WH-1000XM5', 3699.00, 2220.00, 'Black', GETDATE(), '{"brand": "Sony", "model": "WH-1000XM5", "warrantyYears": 1, "specifications": {"noise_cancellation": "industry-leading ANC", "battery": "30 hours", "driver_size": "40mm", "connectivity": "Bluetooth 5.3"}}'),
+(25, 'AUDIO-005', 'Bose QuietComfort 45', 3499.00, 2100.00, 'Black', GETDATE(), '{"brand": "Bose", "model": "QuietComfort 45", "warrantyYears": 1, "specifications": {"noise_cancellation": "dual-microphone ANC", "battery": "24 hours", "driver_type": "custom transducers", "connectivity": "Bluetooth USB-C"}}'),
+(25, 'AUDIO-006', 'Apple AirPods Pro Max', 4999.00, 3000.00, 'Silver', GETDATE(), '{"brand": "Apple", "model": "AirPods Pro Max", "warrantyYears": 1, "specifications": {"noise_cancellation": "Active Noise Cancellation", "battery": "20 hours", "audio": "Spatial audio with Dolby Atmos", "drivers": "40mm custom drivers"}}'),
+(25, 'AUDIO-007', 'Sennheiser Momentum 4', 2999.00, 1800.00, 'Black', GETDATE(), '{"brand": "Sennheiser", "model": "Momentum 4", "warrantyYears": 2, "specifications": {"noise_cancellation": "Adaptive NC", "battery": "60 hours", "driver_size": "42mm", "connectivity": "Bluetooth 5.3"}}'),
 
 -- Microphones (SubCategoryID 26) - 1 product
-(26, 'AUDIO-008', 'Blue Yeti USB Microphone', 999.00, 600.00, 'Black', '2023-07-28 15:15:00', '{"brand": "Blue", "model": "Yeti", "warrantyYears": 2, "specifications": {"capsules": "quad condenser", "pickup_patterns": "4 (cardioid omni bidirectional stereo)", "frequency": "20Hz-20kHz", "connection": "USB"}}'),
+(26, 'AUDIO-008', 'Blue Yeti USB Microphone', 999.00, 600.00, 'Black', GETDATE(), '{"brand": "Blue", "model": "Yeti", "warrantyYears": 2, "specifications": {"capsules": "quad condenser", "pickup_patterns": "4 (cardioid omni bidirectional stereo)", "frequency": "20Hz-20kHz", "connection": "USB"}}'),
 
+-- ========================================
+-- MOBIL & SMARTWATCH (14 products)
+-- ========================================
 
 -- Smartphones (SubCategoryID 27) - 5 products
-(27, 'MOBIL-001', 'iPhone 15 Pro Max 256GB', 15999.00, 9600.00, 'Titanium Blue', '2023-09-22 08:30:00', '{"brand": "Apple", "model": "iPhone 15 Pro Max", "warrantyYears": 1, "specifications": {"processor": "A17 Pro", "ram": "8GB", "storage": "256GB", "display": "6.7-inch Super Retina XDR"}}'),
-(27, 'MOBIL-002', 'Samsung Galaxy S24 Ultra', 15499.00, 9300.00, 'Phantom Black', '2023-12-20 09:15:00', '{"brand": "Samsung", "model": "Galaxy S24 Ultra", "warrantyYears": 1, "specifications": {"processor": "Snapdragon 8 Gen 3", "ram": "12GB", "storage": "256GB", "display": "6.8-inch Dynamic AMOLED 2X"}}'),
-(27, 'MOBIL-003', 'Google Pixel 8 Pro', 12999.00, 7800.00, 'Porcelain', '2023-10-10 10:00:00', '{"brand": "Google", "model": "Pixel 8 Pro", "warrantyYears": 1, "specifications": {"processor": "Tensor G3", "ram": "12GB", "storage": "256GB", "display": "6.7-inch LTPO OLED 120Hz"}}'),
-(27, 'MOBIL-004', 'OnePlus 12', 9999.00, 6000.00, 'Black', '2023-11-15 11:20:00', '{"brand": "OnePlus", "model": "12", "warrantyYears": 1, "specifications": {"processor": "Snapdragon 8 Gen 3", "ram": "12GB", "storage": "256GB", "display": "6.7-inch AMOLED 120Hz"}}'),
-(27, 'MOBIL-005', 'Xiaomi 14 Ultra', 11999.00, 7200.00, 'Black', '2023-12-01 12:30:00', '{"brand": "Xiaomi", "model": "14 Ultra", "warrantyYears": 1, "specifications": {"processor": "Snapdragon 8 Gen 3", "ram": "16GB", "storage": "512GB", "display": "6.73-inch AMOLED 120Hz"}}'),
+(27, 'MOBIL-001', 'iPhone 15 Pro Max 256GB', 15999.00, 9600.00, 'Titanium Blue', GETDATE(), '{"brand": "Apple", "model": "iPhone 15 Pro Max", "warrantyYears": 1, "specifications": {"processor": "A17 Pro", "ram": "8GB", "storage": "256GB", "display": "6.7-inch Super Retina XDR"}}'),
+(27, 'MOBIL-002', 'Samsung Galaxy S24 Ultra', 15499.00, 9300.00, 'Phantom Black', GETDATE(), '{"brand": "Samsung", "model": "Galaxy S24 Ultra", "warrantyYears": 1, "specifications": {"processor": "Snapdragon 8 Gen 3", "ram": "12GB", "storage": "256GB", "display": "6.8-inch Dynamic AMOLED 2X"}}'),
+(27, 'MOBIL-003', 'Google Pixel 8 Pro', 12999.00, 7800.00, 'Porcelain', GETDATE(), '{"brand": "Google", "model": "Pixel 8 Pro", "warrantyYears": 1, "specifications": {"processor": "Tensor G3", "ram": "12GB", "storage": "256GB", "display": "6.7-inch LTPO OLED 120Hz"}}'),
+(27, 'MOBIL-004', 'OnePlus 12', 9999.00, 6000.00, 'Black', GETDATE(), '{"brand": "OnePlus", "model": "12", "warrantyYears": 1, "specifications": {"processor": "Snapdragon 8 Gen 3", "ram": "12GB", "storage": "256GB", "display": "6.7-inch AMOLED 120Hz"}}'),
+(27, 'MOBIL-005', 'Xiaomi 14 Ultra', 11999.00, 7200.00, 'Black', GETDATE(), '{"brand": "Xiaomi", "model": "14 Ultra", "warrantyYears": 1, "specifications": {"processor": "Snapdragon 8 Gen 3", "ram": "16GB", "storage": "512GB", "display": "6.73-inch AMOLED 120Hz"}}'),
 
 -- Smartwatch Accessories (SubCategoryID 28) - 2 products
-(28, 'MOBIL-006', 'Apple Watch Series 9 Band', 499.00, 300.00, 'Red', '2023-08-08 13:45:00', '{"brand": "Apple", "model": "Sport Band", "warrantyYears": 1, "specifications": {"material": "fluoroelastomer", "sizes": "S/M M/L", "waterproof": "yes", "quick_change": "yes"}}'),
-(28, 'MOBIL-007', 'Samsung Galaxy Watch Strap', 399.00, 240.00, 'Black', '2023-09-02 14:20:00', '{"brand": "Samsung", "model": "Sport Band", "warrantyYears": 1, "specifications": {"material": "silicone", "sizes": "S M L", "waterproof": "yes", "quick_release": "yes"}}'),
+(28, 'MOBIL-006', 'Apple Watch Series 9 Band', 499.00, 300.00, 'Red', GETDATE(), '{"brand": "Apple", "model": "Sport Band", "warrantyYears": 1, "specifications": {"material": "fluoroelastomer", "sizes": "S/M M/L", "waterproof": "yes", "quick_change": "yes"}}'),
+(28, 'MOBIL-007', 'Samsung Galaxy Watch Strap', 399.00, 240.00, 'Black', GETDATE(), '{"brand": "Samsung", "model": "Sport Band", "warrantyYears": 1, "specifications": {"material": "silicone", "sizes": "S M L", "waterproof": "yes", "quick_release": "yes"}}'),
 
 -- Smartwatches (SubCategoryID 29) - 3 products
-(29, 'MOBIL-008', 'Apple Watch Ultra 2', 5999.00, 3600.00, 'Titanium', '2023-09-25 15:30:00', '{"brand": "Apple", "model": "Watch Ultra 2", "warrantyYears": 1, "specifications": {"display": "2.04-inch Retina", "processor": "S9", "battery": "36 hours", "water_resistance": "100m"}}'),
-(29, 'MOBIL-009', 'Samsung Galaxy Watch 6 Classic', 3999.00, 2400.00, 'Silver', '2023-10-30 16:15:00', '{"brand": "Samsung", "model": "Galaxy Watch 6 Classic", "warrantyYears": 1, "specifications": {"display": "1.3-inch AMOLED", "processor": "Exynos W930", "battery": "40+ hours", "water_resistance": "50m"}}'),
-(29, 'MOBIL-010', 'Garmin Epix Gen 2', 4999.00, 3000.00, 'Black', '2023-11-08 17:00:00', '{"brand": "Garmin", "model": "Epix Gen 2", "warrantyYears": 1, "specifications": {"display": "1.4-inch AMOLED", "battery": "11 days smartwatch mode", "gps": "yes", "water_resistance": "100m"}}'),
+(29, 'MOBIL-008', 'Apple Watch Ultra 2', 5999.00, 3600.00, 'Titanium', GETDATE(), '{"brand": "Apple", "model": "Watch Ultra 2", "warrantyYears": 1, "specifications": {"display": "2.04-inch Retina", "processor": "S9", "battery": "36 hours", "water_resistance": "100m"}}'),
+(29, 'MOBIL-009', 'Samsung Galaxy Watch 6 Classic', 3999.00, 2400.00, 'Silver', GETDATE(), '{"brand": "Samsung", "model": "Galaxy Watch 6 Classic", "warrantyYears": 1, "specifications": {"display": "1.3-inch AMOLED", "processor": "Exynos W930", "battery": "40+ hours", "water_resistance": "50m"}}'),
+(29, 'MOBIL-010', 'Garmin Epix Gen 2', 4999.00, 3000.00, 'Black', GETDATE(), '{"brand": "Garmin", "model": "Epix Gen 2", "warrantyYears": 1, "specifications": {"display": "1.4-inch AMOLED", "battery": "11 days smartwatch mode", "gps": "yes", "water_resistance": "100m"}}'),
 
 -- Mobile Cases (SubCategoryID 30) - 4 products
-(30, 'MOBIL-011', 'OtterBox Defender iPhone 15', 599.00, 360.00, 'Black', '2023-08-25 08:00:00', '{"brand": "OtterBox", "model": "Defender Series", "warrantyYears": 1, "specifications": {"protection_level": "heavy-duty", "material": "polycarbonate rubber", "drop_tested": "14ft", "port_access": "precise cutouts"}}'),
-(30, 'MOBIL-012', 'Spigen Tough Armor Samsung', 399.00, 240.00, 'Black', '2023-09-10 09:30:00', '{"brand": "Spigen", "model": "Tough Armor", "warrantyYears": 1, "specifications": {"protection": "dual-layer", "material": "TPU hard PC", "weight": "minimal", "shock_absorption": "yes"}}'),
-(30, 'MOBIL-013', 'Apple Silicone Case', 699.00, 420.00, 'Midnight', '2023-07-15 10:15:00', '{"brand": "Apple", "model": "Silicone Case", "warrantyYears": 1, "specifications": {"material": "soft silicone", "lining": "velvety microfiber", "wireless_charging": "compatible", "colors_available": "10"}}'),
-(30, 'MOBIL-014', 'Samsung Leather Case', 799.00, 480.00, 'Brown', '2023-08-02 11:00:00', '{"brand": "Samsung", "model": "Leather Case", "warrantyYears": 1, "specifications": {"material": "genuine leather", "protection_level": "standard", "aesthetic": "premium look", "wireless_charging": "compatible"}}'),
+(30, 'MOBIL-011', 'OtterBox Defender iPhone 15', 599.00, 360.00, 'Black', GETDATE(), '{"brand": "OtterBox", "model": "Defender Series", "warrantyYears": 1, "specifications": {"protection_level": "heavy-duty", "material": "polycarbonate rubber", "drop_tested": "14ft", "port_access": "precise cutouts"}}'),
+(30, 'MOBIL-012', 'Spigen Tough Armor Samsung', 399.00, 240.00, 'Black', GETDATE(), '{"brand": "Spigen", "model": "Tough Armor", "warrantyYears": 1, "specifications": {"protection": "dual-layer", "material": "TPU hard PC", "weight": "minimal", "shock_absorption": "yes"}}'),
+(30, 'MOBIL-013', 'Apple Silicone Case', 699.00, 420.00, 'Midnight', GETDATE(), '{"brand": "Apple", "model": "Silicone Case", "warrantyYears": 1, "specifications": {"material": "soft silicone", "lining": "velvety microfiber", "wireless_charging": "compatible", "colors_available": "10"}}'),
+(30, 'MOBIL-014', 'Samsung Leather Case', 799.00, 480.00, 'Brown', GETDATE(), '{"brand": "Samsung", "model": "Leather Case", "warrantyYears": 1, "specifications": {"material": "genuine leather", "protection_level": "standard", "aesthetic": "premium look", "wireless_charging": "compatible"}}'),
 
+-- ========================================
+-- VITVAROR (5 products)
+-- ========================================
 
 -- Washing Machines (SubCategoryID 31) - 2 products
-(31, 'VITV-001', 'LG Front Load Washer 8kg', 9999.00, 6000.00, 'White', '2023-11-18 08:30:00', '{"brand": "LG", "model": "WF80T4000AW", "warrantyYears": 3, "specifications": {"capacity": "8kg", "programs": "14", "rpm": "1200", "energy_class": "A+++"}}'),
-(31, 'VITV-002', 'Bosch Series 8 Washer 9kg', 11999.00, 7200.00, 'White', '2023-12-05 09:45:00', '{"brand": "Bosch", "model": "WAX32EH00", "warrantyYears": 3, "specifications": {"capacity": "9kg", "programs": "15", "rpm": "1400", "energy_class": "A+++"}}'),
+(31, 'VITV-001', 'LG Front Load Washer 8kg', 9999.00, 6000.00, 'White', GETDATE(), '{"brand": "LG", "model": "WF80T4000AW", "warrantyYears": 3, "specifications": {"capacity": "8kg", "programs": "14", "rpm": "1200", "energy_class": "A+++"}}'),
+(31, 'VITV-002', 'Bosch Series 8 Washer 9kg', 11999.00, 7200.00, 'White', GETDATE(), '{"brand": "Bosch", "model": "WAX32EH00", "warrantyYears": 3, "specifications": {"capacity": "9kg", "programs": "15", "rpm": "1400", "energy_class": "A+++"}}'),
 
 -- Dryers (SubCategoryID 32) - 1 product
-(32, 'VITV-003', 'Samsung DV22N6800HX Dryer', 8999.00, 5400.00, 'Stainless Steel', '2023-10-22 10:20:00', '{"brand": "Samsung", "model": "DV22N6800HX", "warrantyYears": 1, "specifications": {"capacity": "7.4 cu.ft", "type": "electric", "technology": "AI optimal dry", "energy_class": "A++"}}'),
+(32, 'VITV-003', 'Samsung DV22N6800HX Dryer', 8999.00, 5400.00, 'Stainless Steel', GETDATE(), '{"brand": "Samsung", "model": "DV22N6800HX", "warrantyYears": 1, "specifications": {"capacity": "7.4 cu.ft", "type": "electric", "technology": "AI optimal dry", "energy_class": "A++"}}'),
 
 -- Refrigerators (SubCategoryID 33) - 2 products
-(33, 'VITV-004', 'Samsung French Door Fridge 650L', 19999.00, 12000.00, 'Stainless Steel', '2023-12-12 11:00:00', '{"brand": "Samsung", "model": "RF65R9000", "warrantyYears": 3, "specifications": {"capacity": "650L", "type": "French Door", "technology": "Twin Cooling Plus", "energy_class": "A+"}}'),
-(33, 'VITV-005', 'LG Side-by-Side Fridge 700L', 18999.00, 11400.00, 'Black', '2024-01-05 12:15:00', '{"brand": "LG", "model": "GSXV90BSAE", "warrantyYears": 3, "specifications": {"capacity": "700L", "type": "Side-by-Side", "technology": "LinearCooling", "energy_class": "A+"}}'),
+(33, 'VITV-004', 'Samsung French Door Fridge 650L', 19999.00, 12000.00, 'Stainless Steel', GETDATE(), '{"brand": "Samsung", "model": "RF65R9000", "warrantyYears": 3, "specifications": {"capacity": "650L", "type": "French Door", "technology": "Twin Cooling Plus", "energy_class": "A+"}}'),
+(33, 'VITV-005', 'LG Side-by-Side Fridge 700L', 18999.00, 11400.00, 'Black', GETDATE(), '{"brand": "LG", "model": "GSXV90BSAE", "warrantyYears": 3, "specifications": {"capacity": "700L", "type": "Side-by-Side", "technology": "LinearCooling", "energy_class": "A+"}}'),
 
+-- ========================================
+-- KAMERA & FOTO (8 products)
+-- ========================================
 
 -- DSLR Cameras (SubCategoryID 34) - 2 products
-(34, 'CAM-001', 'Canon EOS R5', 24999.00, 15000.00, 'Black', '2023-09-08 08:00:00', '{"brand": "Canon", "model": "EOS R5", "warrantyYears": 2, "specifications": {"sensor": "Full Frame 45MP", "iso_range": "100-51200", "autofocus": "5655 AF points", "video": "8K 60fps"}}'),
-(34, 'CAM-002', 'Nikon D850', 19999.00, 12000.00, 'Black', '2023-10-12 09:30:00', '{"brand": "Nikon", "model": "D850", "warrantyYears": 2, "specifications": {"sensor": "Full Frame 45.7MP", "iso_range": "64-25600", "autofocus": "153 AF points", "video": "4K 30fps"}}'),
+(34, 'CAM-001', 'Canon EOS R5', 24999.00, 15000.00, 'Black', GETDATE(), '{"brand": "Canon", "model": "EOS R5", "warrantyYears": 2, "specifications": {"sensor": "Full Frame 45MP", "iso_range": "100-51200", "autofocus": "5655 AF points", "video": "8K 60fps"}}'),
+(34, 'CAM-002', 'Nikon D850', 19999.00, 12000.00, 'Black', GETDATE(), '{"brand": "Nikon", "model": "D850", "warrantyYears": 2, "specifications": {"sensor": "Full Frame 45.7MP", "iso_range": "64-25600", "autofocus": "153 AF points", "video": "4K 30fps"}}'),
 
 -- Mirrorless Cameras (SubCategoryID 35) - 2 products
-(35, 'CAM-003', 'Sony A7R V', 22999.00, 13800.00, 'Black', '2023-11-05 10:15:00', '{"brand": "Sony", "model": "Alpha 7R V", "warrantyYears": 2, "specifications": {"sensor": "Full Frame 61MP", "iso_range": "80-32000", "autofocus": "693 AF points", "video": "4K 120fps"}}'),
-(35, 'CAM-004', 'Fujifilm X-T5', 15999.00, 9600.00, 'Silver', '2023-12-08 11:45:00', '{"brand": "Fujifilm", "model": "X-T5", "warrantyYears": 2, "specifications": {"sensor": "APS-C 40.2MP", "iso_range": "160-12800", "autofocus": "425 AF points", "video": "4K 60fps"}}'),
+(35, 'CAM-003', 'Sony A7R V', 22999.00, 13800.00, 'Black', GETDATE(), '{"brand": "Sony", "model": "Alpha 7R V", "warrantyYears": 2, "specifications": {"sensor": "Full Frame 61MP", "iso_range": "80-32000", "autofocus": "693 AF points", "video": "4K 120fps"}}'),
+(35, 'CAM-004', 'Fujifilm X-T5', 15999.00, 9600.00, 'Silver', GETDATE(), '{"brand": "Fujifilm", "model": "X-T5", "warrantyYears": 2, "specifications": {"sensor": "APS-C 40.2MP", "iso_range": "160-12800", "autofocus": "425 AF points", "video": "4K 60fps"}}'),
 
 -- Lenses (SubCategoryID 36) - 4 products
-(36, 'CAM-005', 'Canon RF 28-70mm f/2L', 4999.00, 3000.00, 'Black', '2023-08-20 12:30:00', '{"brand": "Canon", "model": "RF 28-70mm f/2L", "warrantyYears": 2, "specifications": {"focal_length": "28-70mm", "aperture": "f/2", "elements": "23 elements", "filter_size": "82mm"}}'),
-(36, 'CAM-006', 'Sony FE 24-70mm f/2.8 GM II', 5999.00, 3600.00, 'Black', '2023-09-15 13:15:00', '{"brand": "Sony", "model": "FE 24-70mm f/2.8 GM II", "warrantyYears": 2, "specifications": {"focal_length": "24-70mm", "aperture": "f/2.8", "elements": "21 elements", "filter_size": "77mm"}}'),
-(36, 'CAM-007', 'Nikon Z 70-200mm f/2.8S', 6999.00, 4200.00, 'Black', '2023-10-25 14:00:00', '{"brand": "Nikon", "model": "Z 70-200mm f/2.8S", "warrantyYears": 2, "specifications": {"focal_length": "70-200mm", "aperture": "f/2.8", "elements": "21 elements", "filter_size": "77mm"}}'),
-(36, 'CAM-008', 'Fujifilm XF 35mm f/1.4 R', 1999.00, 1200.00, 'Black', '2023-11-10 15:20:00', '{"brand": "Fujifilm", "model": "XF 35mm f/1.4 R", "warrantyYears": 2, "specifications": {"focal_length": "35mm", "aperture": "f/1.4", "elements": "8 elements", "filter_size": "52mm"}}'),
+(36, 'CAM-005', 'Canon RF 28-70mm f/2L', 4999.00, 3000.00, 'Black', GETDATE(), '{"brand": "Canon", "model": "RF 28-70mm f/2L", "warrantyYears": 2, "specifications": {"focal_length": "28-70mm", "aperture": "f/2", "elements": "23 elements", "filter_size": "82mm"}}'),
+(36, 'CAM-006', 'Sony FE 24-70mm f/2.8 GM II', 5999.00, 3600.00, 'Black', GETDATE(), '{"brand": "Sony", "model": "FE 24-70mm f/2.8 GM II", "warrantyYears": 2, "specifications": {"focal_length": "24-70mm", "aperture": "f/2.8", "elements": "21 elements", "filter_size": "77mm"}}'),
+(36, 'CAM-007', 'Nikon Z 70-200mm f/2.8S', 6999.00, 4200.00, 'Black', GETDATE(), '{"brand": "Nikon", "model": "Z 70-200mm f/2.8S", "warrantyYears": 2, "specifications": {"focal_length": "70-200mm", "aperture": "f/2.8", "elements": "21 elements", "filter_size": "77mm"}}'),
+(36, 'CAM-008', 'Fujifilm XF 35mm f/1.4 R', 1999.00, 1200.00, 'Black', GETDATE(), '{"brand": "Fujifilm", "model": "XF 35mm f/1.4 R", "warrantyYears": 2, "specifications": {"focal_length": "35mm", "aperture": "f/1.4", "elements": "8 elements", "filter_size": "52mm"}}'),
 
+-- ========================================
+-- TILLBEHÖR (12 products)
+-- ========================================
 
 -- Phone Cases (SubCategoryID 37) - 3 products
-(37, 'ACC-001', 'OtterBox Defender Case', 599.00, 360.00, 'Black', '2023-07-10 08:30:00', '{"brand": "OtterBox", "model": "Defender Series", "warrantyYears": 1, "specifications": {"protection": "heavy-duty", "material": "polycarbonate rubber", "drop_tested": "14ft", "port_protection": "precise cutouts"}}'),
-(37, 'ACC-002', 'Spigen Tough Armor Case', 299.00, 180.00, 'Black', '2023-08-15 09:45:00', '{"brand": "Spigen", "model": "Tough Armor", "warrantyYears": 1, "specifications": {"protection": "dual-layer", "material": "TPU hard PC", "weight": "minimal", "shock_protection": "yes"}}'),
-(37, 'ACC-003', 'Apple Silicone Case', 699.00, 420.00, 'Midnight', '2023-09-20 10:30:00', '{"brand": "Apple", "model": "Silicone Case", "warrantyYears": 1, "specifications": {"material": "soft silicone", "lining": "microfiber", "wireless_charging": "compatible", "colors": "10 available"}}'),
+(37, 'ACC-001', 'OtterBox Defender Case', 599.00, 360.00, 'Black', GETDATE(), '{"brand": "OtterBox", "model": "Defender Series", "warrantyYears": 1, "specifications": {"protection": "heavy-duty", "material": "polycarbonate rubber", "drop_tested": "14ft", "port_protection": "precise cutouts"}}'),
+(37, 'ACC-002', 'Spigen Tough Armor Case', 299.00, 180.00, 'Black', GETDATE(), '{"brand": "Spigen", "model": "Tough Armor", "warrantyYears": 1, "specifications": {"protection": "dual-layer", "material": "TPU hard PC", "weight": "minimal", "shock_protection": "yes"}}'),
+(37, 'ACC-003', 'Apple Silicone Case', 699.00, 420.00, 'Midnight', GETDATE(), '{"brand": "Apple", "model": "Silicone Case", "warrantyYears": 1, "specifications": {"material": "soft silicone", "lining": "microfiber", "wireless_charging": "compatible", "colors": "10 available"}}'),
 
 -- Cables (SubCategoryID 38) - 3 products
-(38, 'ACC-004', 'Anker USB-C Cable 2m', 199.00, 120.00, 'Black', '2023-06-12 11:00:00', '{"brand": "Anker", "model": "USB-C to USB-C", "warrantyYears": 1, "specifications": {"length": "2m", "power_delivery": "100W", "data_speed": "480Mbps USB 3.1", "certification": "USB certified"}}'),
-(38, 'ACC-005', 'Belkin Lightning Cable 1m', 249.00, 150.00, 'White', '2023-07-22 12:20:00', '{"brand": "Belkin", "model": "USB-A to Lightning", "warrantyYears": 1, "specifications": {"length": "1m", "current": "2.4A", "mfi_certified": "yes", "durability": "reinforced connector"}}'),
-(38, 'ACC-006', 'HDMI 2.1 Cable 2m', 299.00, 180.00, 'Black', '2023-08-28 13:30:00', '{"brand": "Generic", "model": "HDMI 2.1", "warrantyYears": 1, "specifications": {"length": "2m", "bandwidth": "48Gbps", "support": "8K 60Hz", "certification": "HDMI 2.1 certified"}}'),
+(38, 'ACC-004', 'Anker USB-C Cable 2m', 199.00, 120.00, 'Black', GETDATE(), '{"brand": "Anker", "model": "USB-C to USB-C", "warrantyYears": 1, "specifications": {"length": "2m", "power_delivery": "100W", "data_speed": "480Mbps USB 3.1", "certification": "USB certified"}}'),
+(38, 'ACC-005', 'Belkin Lightning Cable 1m', 249.00, 150.00, 'White', GETDATE(), '{"brand": "Belkin", "model": "USB-A to Lightning", "warrantyYears": 1, "specifications": {"length": "1m", "current": "2.4A", "mfi_certified": "yes", "durability": "reinforced connector"}}'),
+(38, 'ACC-006', 'HDMI 2.1 Cable 2m', 299.00, 180.00, 'Black', GETDATE(), '{"brand": "Generic", "model": "HDMI 2.1", "warrantyYears": 1, "specifications": {"length": "2m", "bandwidth": "48Gbps", "support": "8K 60Hz", "certification": "HDMI 2.1 certified"}}'),
 
 -- Chargers (SubCategoryID 39) - 3 products
-(39, 'ACC-007', 'Anker 67W GaN Charger', 599.00, 360.00, 'Black', '2023-05-15 08:15:00', '{"brand": "Anker", "model": "67W GaN Charger", "warrantyYears": 1, "specifications": {"power": "67W", "ports": "1x USB-C", "technology": "GaN", "compatible_devices": "3 devices"}}'),
-(39, 'ACC-008', 'Apple 20W USB-C Power Adapter', 399.00, 240.00, 'White', '2023-06-25 09:40:00', '{"brand": "Apple", "model": "20W USB-C", "warrantyYears": 1, "specifications": {"power": "20W", "compatibility": "iPhone 12+, iPad", "technology": "USB Power Delivery", "size": "compact"}}'),
-(39, 'ACC-009', 'Samsung 45W Fast Charger', 449.00, 270.00, 'Black', '2023-07-30 10:50:00', '{"brand": "Samsung", "model": "45W Charger", "warrantyYears": 1, "specifications": {"power": "45W", "compatibility": "Samsung Galaxy", "fast_charge": "35W super fast", "port": "USB-C"}}'),
+(39, 'ACC-007', 'Anker 67W GaN Charger', 599.00, 360.00, 'Black', GETDATE(), '{"brand": "Anker", "model": "67W GaN Charger", "warrantyYears": 1, "specifications": {"power": "67W", "ports": "1x USB-C", "technology": "GaN", "compatible_devices": "3 devices"}}'),
+(39, 'ACC-008', 'Apple 20W USB-C Power Adapter', 399.00, 240.00, 'White', GETDATE(), '{"brand": "Apple", "model": "20W USB-C", "warrantyYears": 1, "specifications": {"power": "20W", "compatibility": "iPhone 12+, iPad", "technology": "USB Power Delivery", "size": "compact"}}'),
+(39, 'ACC-009', 'Samsung 45W Fast Charger', 449.00, 270.00, 'Black', GETDATE(), '{"brand": "Samsung", "model": "45W Charger", "warrantyYears": 1, "specifications": {"power": "45W", "compatibility": "Samsung Galaxy", "fast_charge": "35W super fast", "port": "USB-C"}}'),
 
 -- Adapters (SubCategoryID 40) - 2 products
-(40, 'ACC-010', 'Anker USB-C Hub 7-in-1', 699.00, 420.00, 'Silver', '2023-06-05 11:30:00', '{"brand": "Anker", "model": "7-in-1 USB-C Hub", "warrantyYears": 1, "specifications": {"ports": "HDMI, USB 3.0 x3, SD, microSD, USB-C", "compatibility": "MacBook, iPad Pro, laptops", "data_speed": "5Gbps", "power_delivery": "60W"}}'),
-(40, 'ACC-011', 'Belkin USB-C Multiport Hub', 799.00, 480.00, 'Gray', '2023-07-10 12:45:00', '{"brand": "Belkin", "model": "USB-C Multiport Hub", "warrantyYears": 2, "specifications": {"ports": "HDMI, USB 3.0 x2, USB-C, SD", "compatibility": "universal USB-C devices", "data_speed": "5Gbps", "power_delivery": "100W"}}'),
+(40, 'ACC-010', 'Anker USB-C Hub 7-in-1', 699.00, 420.00, 'Silver', GETDATE(), '{"brand": "Anker", "model": "7-in-1 USB-C Hub", "warrantyYears": 1, "specifications": {"ports": "HDMI, USB 3.0 x3, SD, microSD, USB-C", "compatibility": "MacBook, iPad Pro, laptops", "data_speed": "5Gbps", "power_delivery": "60W"}}'),
+(40, 'ACC-011', 'Belkin USB-C Multiport Hub', 799.00, 480.00, 'Gray', GETDATE(), '{"brand": "Belkin", "model": "USB-C Multiport Hub", "warrantyYears": 2, "specifications": {"ports": "HDMI, USB 3.0 x2, USB-C, SD", "compatibility": "universal USB-C devices", "data_speed": "5Gbps", "power_delivery": "100W"}}'),
 
 -- Screen Protectors (SubCategoryID 41) - 2 products
-(41, 'ACC-012', 'Spigen Tempered Glass iPhone', 299.00, 180.00, 'Clear', '2023-05-20 13:15:00', '{"brand": "Spigen", "model": "Tempered Glass", "warrantyYears": 1, "specifications": {"hardness": "9H", "oleophobic_coating": "yes", "transparency": "ultra-clear", "installation": "alignment kit included"}}'),
-(41, 'ACC-013', 'ZAGG InvisibleShield Glass', 249.00, 150.00, 'Clear', '2023-06-18 14:00:00', '{"brand": "ZAGG", "model": "InvisibleShield", "warrantyYears": 1, "specifications": {"material": "tempered glass", "hardness": "9H", "self_healing": "anti-microbial", "warranty": "drop protection warranty"}}');
-
+(41, 'ACC-012', 'Spigen Tempered Glass iPhone', 299.00, 180.00, 'Clear', GETDATE(), '{"brand": "Spigen", "model": "Tempered Glass", "warrantyYears": 1, "specifications": {"hardness": "9H", "oleophobic_coating": "yes", "transparency": "ultra-clear", "installation": "alignment kit included"}}'),
+(41, 'ACC-013', 'ZAGG InvisibleShield Glass', 249.00, 150.00, 'Clear', GETDATE(), '{"brand": "ZAGG", "model": "InvisibleShield", "warrantyYears": 1, "specifications": {"material": "tempered glass", "hardness": "9H", "self_healing": "anti-microbial", "warranty": "drop protection warranty"}}');
 
 INSERT INTO dbo.Customer (FirstName, LastName, Email, Phone) VALUES
 ('Anders', 'Svensson', 'anders.svensson@gmail.com', '0701234567'),
@@ -469,6 +495,9 @@ INSERT INTO dbo.Customer (FirstName, LastName, Email, Phone) VALUES
 ('Berta', 'Gessler', 'berta.gessler@gmail.com', '0701001112'),
 ('Christer', 'Geter', 'christer.geter@outlook.se', '0702112223');
 
+-- =====================================================
+-- INSERT PAYMENTS (180 Payments with Realistic Distribution)
+-- =====================================================
 
 USE NetOnNet
 GO
@@ -712,241 +741,480 @@ INSERT INTO dbo.Payment (MethodName, ProviderName, IsApproved, CreatedDate) VALU
 
 INSERT INTO dbo.Payment (MethodName, ProviderName, IsApproved, CreatedDate) VALUES
 -- JANUARY (20 payments)
-('Kort', 'Visa', 1, '2024-01-05 09:12:30'),           
-('Kort', 'Mastercard', 1, '2024-01-08 14:42:22'),     
-('Kort', 'Visa', 1, '2024-01-10 11:29:15'),           
-('Swish', 'Swish', 1, '2024-01-12 19:25:44'),         
-('Kort', 'Mastercard', 1, '2024-01-15 08:19:10'),     
-('Swish', 'Swish', 1, '2024-01-18 16:51:33'),         
-('Faktura', 'Klarna', 1, '2024-01-20 13:08:18'),      
-('Kort', 'Visa', 1, '2024-01-22 10:44:25'),           
-('Swish', 'Swish', 1, '2024-01-24 21:32:52'),         
-('Kort', 'Mastercard', 1, '2024-01-26 15:16:07'),     
-('Kort', 'Visa', 1, '2024-01-27 09:41:41'),           
-('Swish', 'Swish', 0, '2024-01-28 17:23:14'),         
-('Kort', 'Visa', 1, '2024-01-29 12:00:56'),           
-('Faktura', 'Klarna', 1, '2024-01-30 20:15:29'),      
-('Kort', 'Mastercard', 1, '2024-01-02 08:53:12'),     
-('Swish', 'Swish', 1, '2024-01-03 14:30:48'),         
-('Kort', 'Visa', 1, '2024-01-04 10:09:36'),           
-('Avbetalning', 'Klarna', 1, '2024-01-06 18:44:19'),  
-('Kort', 'Mastercard', 1, '2024-01-07 11:22:05'),     
-('Paypal', 'Paypal', 1, '2024-01-09 22:11:38'),       
+('Kort', 'Visa', 1, '2024-01-05 09:15:00'),
+('Kort', 'Mastercard', 1, '2024-01-08 14:32:00'),
+('Kort', 'Visa', 1, '2024-01-10 11:47:00'),
+('Swish', 'Swish', 1, '2024-01-12 16:20:00'),
+('Kort', 'Mastercard', 1, '2024-01-15 10:05:00'),
+('Swish', 'Swish', 1, '2024-01-18 13:45:00'),
+('Faktura', 'Klarna', 1, '2024-01-20 08:30:00'),
+('Kort', 'Visa', 1, '2024-01-22 15:10:00'),
+('Swish', 'Swish', 1, '2024-01-24 12:25:00'),
+('Kort', 'Mastercard', 1, '2024-01-26 09:40:00'),
+('Kort', 'Visa', 1, '2024-01-27 14:55:00'),
+('Swish', 'Swish', 0, '2024-01-28 11:30:00'),
+('Kort', 'Visa', 1, '2024-01-29 16:15:00'),
+('Faktura', 'Klarna', 1, '2024-01-30 10:20:00'),
+('Kort', 'Mastercard', 1, '2024-01-02 13:35:00'),
+('Swish', 'Swish', 1, '2024-01-03 09:50:00'),
+('Kort', 'Visa', 1, '2024-01-04 15:00:00'),
+('Avbetalning', 'Klarna', 1, '2024-01-06 12:10:00'),
+('Kort', 'Mastercard', 1, '2024-01-07 08:45:00'),
+('Paypal', 'Paypal', 1, '2024-01-09 14:30:00'),
 
 -- FEBRUARY (12 payments)
-('Kort', 'Visa', 1, '2024-02-01 09:27:12'),           
-('Swish', 'Swish', 1, '2024-02-05 15:45:33'),         
-('Kort', 'Mastercard', 1, '2024-02-08 11:14:44'),     
-('Kort', 'Visa', 1, '2024-02-10 19:49:21'),           
-('Swish', 'Swish', 1, '2024-02-12 08:38:15'),         
-('Kort', 'Mastercard', 1, '2024-02-15 16:22:38'),     
-('Faktura', 'Klarna', 1, '2024-02-18 12:33:49'),      
-('Kort', 'Visa', 1, '2024-02-20 20:16:24'),           
-('Swish', 'Swish', 1, '2024-02-22 10:05:57'),         
-('Kort', 'Mastercard', 1, '2024-02-24 14:50:12'),     
-('Kort', 'Visa', 0, '2024-02-26 21:39:33'),           
-('Avbetalning', 'Klarna', 1, '2024-02-28 09:16:44'),  
+('Kort', 'Visa', 1, '2024-02-01 10:15:00'),
+('Swish', 'Swish', 1, '2024-02-05 13:40:00'),
+('Kort', 'Mastercard', 1, '2024-02-08 09:25:00'),
+('Kort', 'Visa', 1, '2024-02-10 15:50:00'),
+('Swish', 'Swish', 1, '2024-02-12 11:35:00'),
+('Kort', 'Mastercard', 1, '2024-02-15 14:20:00'),
+('Faktura', 'Klarna', 1, '2024-02-18 08:00:00'),
+('Kort', 'Visa', 1, '2024-02-20 16:45:00'),
+('Swish', 'Swish', 1, '2024-02-22 12:30:00'),
+('Kort', 'Mastercard', 1, '2024-02-24 10:10:00'),
+('Kort', 'Visa', 0, '2024-02-26 13:25:00'),
+('Avbetalning', 'Klarna', 1, '2024-02-28 09:55:00'),
 
 -- MARCH (15 payments)
-('Kort', 'Visa', 1, '2024-03-02 13:24:16'),           
-('Swish', 'Swish', 1, '2024-03-05 10:12:29'),         
-('Kort', 'Mastercard', 1, '2024-03-08 17:46:38'),     
-('Kort', 'Visa', 1, '2024-03-10 08:31:52'),           
-('Swish', 'Swish', 1, '2024-03-12 15:19:11'),         
-('Kort', 'Mastercard', 1, '2024-03-15 11:53:44'),     
-('Faktura', 'Klarna', 1, '2024-03-18 20:08:23'),      
-('Kort', 'Visa', 1, '2024-03-20 09:45:35'),           
-('Swish', 'Swish', 1, '2024-03-22 16:30:19'),         
-('Kort', 'Mastercard', 1, '2024-03-24 12:04:46'),     
-('Kort', 'Visa', 1, '2024-03-26 19:41:12'),           
-('Paypal', 'Paypal', 1, '2024-03-28 10:12:53'),       
-('Avbetalning', 'Klarna', 1, '2024-03-29 14:33:28'),  
-('Kort', 'Mastercard', 1, '2024-03-01 08:09:41'),     
-('Swish', 'Swish', 1, '2024-03-03 18:55:14'),         
+('Kort', 'Visa', 1, '2024-03-02 11:40:00'),
+('Swish', 'Swish', 1, '2024-03-05 14:55:00'),
+('Kort', 'Mastercard', 1, '2024-03-08 10:30:00'),
+('Kort', 'Visa', 1, '2024-03-10 15:15:00'),
+('Swish', 'Swish', 1, '2024-03-12 09:45:00'),
+('Kort', 'Mastercard', 1, '2024-03-15 13:20:00'),
+('Faktura', 'Klarna', 1, '2024-03-18 08:50:00'),
+('Kort', 'Visa', 1, '2024-03-20 16:10:00'),
+('Swish', 'Swish', 1, '2024-03-22 12:35:00'),
+('Kort', 'Mastercard', 1, '2024-03-24 11:05:00'),
+('Kort', 'Visa', 1, '2024-03-26 14:40:00'),
+('Paypal', 'Paypal', 1, '2024-03-28 10:15:00'),
+('Avbetalning', 'Klarna', 1, '2024-03-29 15:50:00'),
+('Kort', 'Mastercard', 1, '2024-03-01 09:30:00'),
+('Swish', 'Swish', 1, '2024-03-03 13:45:00'),
 
 -- APRIL (15 payments)
-('Kort', 'Visa', 1, '2024-04-02 11:40:27'),           
-('Swish', 'Swish', 1, '2024-04-05 09:23:35'),         
-('Kort', 'Mastercard', 1, '2024-04-08 15:36:18'),     
-('Faktura', 'Klarna', 1, '2024-04-10 20:52:42'),      
-('Kort', 'Visa', 1, '2024-04-12 10:11:11'),           
-('Swish', 'Swish', 1, '2024-04-15 16:44:29'),         
-('Kort', 'Mastercard', 1, '2024-04-18 12:29:53'),     
-('Kort', 'Visa', 1, '2024-04-20 08:16:36'),           
-('Swish', 'Swish', 1, '2024-04-22 17:01:15'),         
-('Avbetalning', 'Klarna', 1, '2024-04-24 13:47:44'),  
-('Kort', 'Mastercard', 1, '2024-04-26 21:20:18'),     
-('Kort', 'Visa', 1, '2024-04-27 09:08:52'),           
-('Faktura', 'Klarna', 1, '2024-04-28 14:42:33'),      
-('Swish', 'Swish', 1, '2024-04-29 11:05:19'),         
-('Kort', 'Visa', 1, '2024-04-30 19:34:47'),           
+('Kort', 'Visa', 1, '2024-04-02 10:20:00'),
+('Swish', 'Swish', 1, '2024-04-05 14:35:00'),
+('Kort', 'Mastercard', 1, '2024-04-08 11:50:00'),
+('Faktura', 'Klarna', 1, '2024-04-10 16:00:00'),
+('Kort', 'Visa', 1, '2024-04-12 09:15:00'),
+('Swish', 'Swish', 1, '2024-04-15 13:40:00'),
+('Kort', 'Mastercard', 1, '2024-04-18 10:55:00'),
+('Kort', 'Visa', 1, '2024-04-20 15:25:00'),
+('Swish', 'Swish', 1, '2024-04-22 12:10:00'),
+('Avbetalning', 'Klarna', 1, '2024-04-24 08:45:00'),
+('Kort', 'Mastercard', 1, '2024-04-26 14:30:00'),
+('Kort', 'Visa', 1, '2024-04-27 11:00:00'),
+('Faktura', 'Klarna', 1, '2024-04-28 16:20:00'),
+('Swish', 'Swish', 1, '2024-04-29 09:35:00'),
+('Kort', 'Visa', 1, '2024-04-30 13:15:00'),
 
 -- MAY (15 payments)
-('Kort', 'Mastercard', 1, '2024-05-02 10:19:14'),     
-('Swish', 'Swish', 1, '2024-05-05 16:08:38'),         
-('Kort', 'Visa', 1, '2024-05-08 12:46:25'),           
-('Kort', 'Mastercard', 1, '2024-05-10 08:33:52'),     
-('Faktura', 'Klarna', 1, '2024-05-12 15:25:19'),      
-('Kort', 'Visa', 1, '2024-05-15 20:41:33'),           
-('Swish', 'Swish', 1, '2024-05-18 09:14:46'),         
-('Kort', 'Mastercard', 1, '2024-05-20 16:59:11'),     
-('Kort', 'Visa', 1, '2024-05-22 13:28:44'),           
-('Avbetalning', 'Klarna', 1, '2024-05-24 10:52:28'),  
-('Swish', 'Swish', 1, '2024-05-26 18:17:19'),         
-('Kort', 'Mastercard', 1, '2024-05-27 11:41:52'),     
-('Kort', 'Visa', 0, '2024-05-28 14:09:37'),           
-('Paypal', 'Paypal', 1, '2024-05-29 21:30:15'),       
-('Kort', 'Visa', 1, '2024-05-30 09:45:23'),           
+('Kort', 'Mastercard', 1, '2024-05-02 10:40:00'),
+('Swish', 'Swish', 1, '2024-05-05 14:20:00'),
+('Kort', 'Visa', 1, '2024-05-08 11:30:00'),
+('Kort', 'Mastercard', 1, '2024-05-10 15:45:00'),
+('Faktura', 'Klarna', 1, '2024-05-12 09:50:00'),
+('Kort', 'Visa', 1, '2024-05-15 13:35:00'),
+('Swish', 'Swish', 1, '2024-05-18 12:05:00'),
+('Kort', 'Mastercard', 1, '2024-05-20 16:15:00'),
+('Kort', 'Visa', 1, '2024-05-22 10:25:00'),
+('Avbetalning', 'Klarna', 1, '2024-05-24 14:00:00'),
+('Swish', 'Swish', 1, '2024-05-26 11:40:00'),
+('Kort', 'Mastercard', 1, '2024-05-27 09:10:00'),
+('Kort', 'Visa', 0, '2024-05-28 15:55:00'),
+('Paypal', 'Paypal', 1, '2024-05-29 12:20:00'),
+('Kort', 'Visa', 1, '2024-05-30 13:50:00'),
 
 -- JUNE (10 payments)
-('Kort', 'Mastercard', 1, '2024-06-02 15:14:44'),     
-('Swish', 'Swish', 1, '2024-06-05 10:36:12'),         
-('Kort', 'Visa', 1, '2024-06-08 18:49:37'),           
-('Kort', 'Mastercard', 1, '2024-06-10 12:23:19'),     
-('Faktura', 'Klarna', 1, '2024-06-15 08:41:53'),      
-('Kort', 'Visa', 1, '2024-06-18 16:12:24'),           
-('Swish', 'Swish', 1, '2024-06-20 11:30:46'),         
-('Kort', 'Mastercard', 1, '2024-06-22 20:04:18'),     
-('Kort', 'Visa', 1, '2024-06-25 13:39:29'),           
-('Avbetalning', 'Klarna', 1, '2024-06-28 09:16:51'),  
+('Kort', 'Mastercard', 1, '2024-06-02 11:15:00'),
+('Swish', 'Swish', 1, '2024-06-05 14:45:00'),
+('Kort', 'Visa', 1, '2024-06-08 10:30:00'),
+('Kort', 'Mastercard', 1, '2024-06-10 16:00:00'),
+('Faktura', 'Klarna', 1, '2024-06-15 09:20:00'),
+('Kort', 'Visa', 1, '2024-06-18 13:35:00'),
+('Swish', 'Swish', 1, '2024-06-20 12:50:00'),
+('Kort', 'Mastercard', 1, '2024-06-22 15:10:00'),
+('Kort', 'Visa', 1, '2024-06-25 10:40:00'),
+('Avbetalning', 'Klarna', 1, '2024-06-28 14:25:00'),
 
 -- JULY (10 payments)
-('Kort', 'Visa', 1, '2024-07-02 17:32:22'),           
-('Swish', 'Swish', 1, '2024-07-05 10:45:14'),         
-('Kort', 'Mastercard', 1, '2024-07-08 14:18:38'),     
-('Kort', 'Visa', 1, '2024-07-10 19:08:45'),           
-('Faktura', 'Klarna', 1, '2024-07-15 08:50:19'),      
-('Kort', 'Mastercard', 1, '2024-07-18 15:23:32'),     
-('Swish', 'Swish', 1, '2024-07-20 11:36:47'),         
-('Kort', 'Visa', 1, '2024-07-22 20:11:23'),           
-('Kort', 'Mastercard', 1, '2024-07-25 12:39:16'),     
-('Paypal', 'Paypal', 1, '2024-07-28 09:24:51'),       
+('Kort', 'Visa', 1, '2024-07-02 11:50:00'),
+('Swish', 'Swish', 1, '2024-07-05 14:10:00'),
+('Kort', 'Mastercard', 1, '2024-07-08 10:15:00'),
+('Kort', 'Visa', 1, '2024-07-10 16:30:00'),
+('Faktura', 'Klarna', 1, '2024-07-15 09:45:00'),
+('Kort', 'Mastercard', 1, '2024-07-18 13:20:00'),
+('Swish', 'Swish', 1, '2024-07-20 12:35:00'),
+('Kort', 'Visa', 1, '2024-07-22 15:50:00'),
+('Kort', 'Mastercard', 1, '2024-07-25 10:05:00'),
+('Paypal', 'Paypal', 1, '2024-07-28 14:40:00'),
 
 -- AUGUST (13 payments)
-('Kort', 'Visa', 1, '2024-08-01 16:41:38'),           
-('Kort', 'Mastercard', 1, '2024-08-03 11:09:25'),     
-('Swish', 'Swish', 1, '2024-08-05 18:34:12'),         
-('Kort', 'Visa', 1, '2024-08-08 10:16:44'),           
-('Kort', 'Mastercard', 1, '2024-08-10 15:48:33'),     
-('Swish', 'Swish', 1, '2024-08-12 09:23:18'),         
-('Faktura', 'Klarna', 1, '2024-08-15 20:45:52'),      
-('Kort', 'Visa', 1, '2024-08-18 13:14:29'),           
-('Kort', 'Mastercard', 1, '2024-08-20 08:32:14'),     
-('Swish', 'Swish', 1, '2024-08-22 17:19:41'),         
-('Kort', 'Visa', 1, '2024-08-24 12:06:37'),           
-('Avbetalning', 'Klarna', 1, '2024-08-26 14:41:19'),  
-('Kort', 'Mastercard', 0, '2024-08-28 10:28:52'),     
+('Kort', 'Visa', 1, '2024-08-01 11:20:00'),
+('Kort', 'Mastercard', 1, '2024-08-03 14:50:00'),
+('Swish', 'Swish', 1, '2024-08-05 10:25:00'),
+('Kort', 'Visa', 1, '2024-08-08 16:15:00'),
+('Kort', 'Mastercard', 1, '2024-08-10 09:40:00'),
+('Swish', 'Swish', 1, '2024-08-12 13:55:00'),
+('Faktura', 'Klarna', 1, '2024-08-15 12:10:00'),
+('Kort', 'Visa', 1, '2024-08-18 15:35:00'),
+('Kort', 'Mastercard', 1, '2024-08-20 10:50:00'),
+('Swish', 'Swish', 1, '2024-08-22 14:20:00'),
+('Kort', 'Visa', 1, '2024-08-24 11:30:00'),
+('Avbetalning', 'Klarna', 1, '2024-08-26 09:05:00'),
+('Kort', 'Mastercard', 0, '2024-08-28 15:45:00'),
 
 -- SEPTEMBER (16 payments)
-('Kort', 'Visa', 1, '2024-09-02 09:12:23'),           
-('Kort', 'Mastercard', 1, '2024-09-04 16:45:47'),     
-('Swish', 'Swish', 1, '2024-09-06 12:28:15'),         
-('Kort', 'Visa', 1, '2024-09-08 20:41:28'),           
-('Kort', 'Mastercard', 1, '2024-09-10 10:16:52'),     
-('Swish', 'Swish', 1, '2024-09-12 15:33:11'),         
-('Faktura', 'Klarna', 1, '2024-09-14 08:19:39'),      
-('Kort', 'Visa', 1, '2024-09-16 18:08:44'),           
-('Kort', 'Mastercard', 1, '2024-09-18 13:44:33'),     
-('Swish', 'Swish', 1, '2024-09-20 11:22:19'),         
-('Kort', 'Visa', 1, '2024-09-22 21:10:56'),           
-('Avbetalning', 'Klarna', 1, '2024-09-24 09:41:27'),  
-('Kort', 'Mastercard', 1, '2024-09-26 17:29:14'),     
-('Kort', 'Visa', 1, '2024-09-27 12:15:38'),           
-('Paypal', 'Paypal', 1, '2024-09-28 14:52:22'),       
-('Kort', 'Mastercard', 1, '2024-09-29 10:00:47'),     
+('Kort', 'Visa', 1, '2024-09-02 10:35:00'),
+('Kort', 'Mastercard', 1, '2024-09-04 14:15:00'),
+('Swish', 'Swish', 1, '2024-09-06 11:50:00'),
+('Kort', 'Visa', 1, '2024-09-08 16:40:00'),
+('Kort', 'Mastercard', 1, '2024-09-10 09:25:00'),
+('Swish', 'Swish', 1, '2024-09-12 13:10:00'),
+('Faktura', 'Klarna', 1, '2024-09-14 12:35:00'),
+('Kort', 'Visa', 1, '2024-09-16 15:50:00'),
+('Kort', 'Mastercard', 1, '2024-09-18 10:20:00'),
+('Swish', 'Swish', 1, '2024-09-20 14:00:00'),
+('Kort', 'Visa', 1, '2024-09-22 11:15:00'),
+('Avbetalning', 'Klarna', 1, '2024-09-24 09:45:00'),
+('Kort', 'Mastercard', 1, '2024-09-26 15:30:00'),
+('Kort', 'Visa', 1, '2024-09-27 10:55:00'),
+('Paypal', 'Paypal', 1, '2024-09-28 13:40:00'),
+('Kort', 'Mastercard', 1, '2024-09-29 12:05:00'),
 
 -- OCTOBER (16 payments)
-('Kort', 'Visa', 1, '2024-10-01 15:36:12'),           
-('Kort', 'Mastercard', 1, '2024-10-03 11:14:35'),     
-('Swish', 'Swish', 1, '2024-10-05 19:41:58'),         
-('Kort', 'Visa', 1, '2024-10-07 09:23:21'),           
-('Kort', 'Mastercard', 1, '2024-10-09 16:49:44'),     
-('Faktura', 'Klarna', 1, '2024-10-11 13:05:19'),      
-('Kort', 'Visa', 1, '2024-10-13 20:28:37'),           
-('Swish', 'Swish', 1, '2024-10-15 10:44:22'),         
-('Kort', 'Mastercard', 1, '2024-10-17 14:20:51'),     
-('Kort', 'Visa', 1, '2024-10-19 08:33:18'),           
-('Kort', 'Mastercard', 1, '2024-10-21 17:16:44'),     
-('Avbetalning', 'Klarna', 1, '2024-10-23 12:39:33'),  
-('Kort', 'Visa', 1, '2024-10-25 21:12:27'),           
-('Swish', 'Swish', 1, '2024-10-27 09:50:14'),         
-('Kort', 'Mastercard', 1, '2024-10-29 15:25:46'),     
-('Kort', 'Visa', 1, '2024-10-30 11:01:35'),           
+('Kort', 'Visa', 1, '2024-10-01 11:30:00'),
+('Kort', 'Mastercard', 1, '2024-10-03 14:50:00'),
+('Swish', 'Swish', 1, '2024-10-05 10:15:00'),
+('Kort', 'Visa', 1, '2024-10-07 15:45:00'),
+('Kort', 'Mastercard', 1, '2024-10-09 09:20:00'),
+('Faktura', 'Klarna', 1, '2024-10-11 13:35:00'),
+('Kort', 'Visa', 1, '2024-10-13 12:50:00'),
+('Swish', 'Swish', 1, '2024-10-15 16:10:00'),
+('Kort', 'Mastercard', 1, '2024-10-17 10:40:00'),
+('Kort', 'Visa', 1, '2024-10-19 14:25:00'),
+('Kort', 'Mastercard', 1, '2024-10-21 11:05:00'),
+('Avbetalning', 'Klarna', 1, '2024-10-23 09:30:00'),
+('Kort', 'Visa', 1, '2024-10-25 15:15:00'),
+('Swish', 'Swish', 1, '2024-10-27 12:40:00'),
+('Kort', 'Mastercard', 1, '2024-10-29 13:55:00'),
+('Kort', 'Visa', 1, '2024-10-30 10:20:00'),
 
--- NOVEMBER (37 payments - BLACK FRIDAY)
-('Kort', 'Visa', 1, '2024-11-01 10:09:44'),           
-('Kort', 'Mastercard', 1, '2024-11-03 16:35:21'),     
-('Swish', 'Swish', 1, '2024-11-05 13:22:55'),         
-('Kort', 'Visa', 1, '2024-11-07 20:44:18'),           
-('Kort', 'Mastercard', 1, '2024-11-09 09:28:29'),     
-('Faktura', 'Klarna', 1, '2024-11-11 17:11:36'),      
-('Kort', 'Visa', 1, '2024-11-13 11:46:52'),           
-('Swish', 'Swish', 1, '2024-11-14 14:19:17'),         
-('Kort', 'Mastercard', 1, '2024-11-15 08:41:33'),     
-('Kort', 'Visa', 1, '2024-11-16 18:33:14'),           
-('Avbetalning', 'Klarna', 1, '2024-11-17 12:08:48'),  
-('Kort', 'Mastercard', 1, '2024-11-18 21:24:39'),     
-('Kort', 'Visa', 1, '2024-11-19 10:10:22'),           
-('Swish', 'Swish', 1, '2024-11-20 15:41:51'),         
-('Kort', 'Mastercard', 1, '2024-11-21 09:16:37'),     
-('Kort', 'Visa', 1, '2024-11-22 16:59:14'),           
-('Faktura', 'Klarna', 1, '2024-11-23 13:32:48'),      
-('Kort', 'Mastercard', 0, '2024-11-24 20:55:25'),     
-('Swish', 'Swish', 1, '2024-11-25 08:23:19'),         
-('Kort', 'Visa', 1, '2024-11-26 14:48:42'),           
-('Kort', 'Mastercard', 1, '2024-11-27 11:35:57'),     
-('Avbetalning', 'Klarna', 1, '2024-11-28 19:09:33'),  
-('Kort', 'Visa', 1, '2024-11-29 12:41:16'),           
-('Kort', 'Mastercard', 1, '2024-11-30 10:14:29'),     
-('Swish', 'Swish', 1, '2024-11-02 16:20:38'),         
-('Kort', 'Visa', 1, '2024-11-04 09:44:52'),           
-('Kort', 'Mastercard', 1, '2024-11-06 17:12:44'),     
-('Faktura', 'Klarna', 1, '2024-11-08 13:06:21'),      
-('Kort', 'Visa', 1, '2024-11-10 20:29:15'),           
-('Kort', 'Mastercard', 1, '2024-11-12 10:55:38'),     
-('Swish', 'Swish', 1, '2024-11-19 15:38:44'),         
-('Kort', 'Visa', 1, '2024-11-21 11:23:33'),           
-('Kort', 'Mastercard', 1, '2024-11-23 18:16:51'),     
-('Avbetalning', 'Klarna', 1, '2024-11-25 09:32:28'),  
-('Kort', 'Visa', 1, '2024-11-26 16:45:14'),           
-('Kort', 'Mastercard', 1, '2024-11-27 12:09:47'),     
-('Swish', 'Swish', 1, '2024-11-28 20:01:32'),         
+-- NOVEMBER (37 payments - BLACK FRIDAY/CYBER MONDAY)
+('Kort', 'Visa', 1, '2024-11-01 11:45:00'),
+('Kort', 'Mastercard', 1, '2024-11-03 14:30:00'),
+('Swish', 'Swish', 1, '2024-11-05 10:50:00'),
+('Kort', 'Visa', 1, '2024-11-07 15:20:00'),
+('Kort', 'Mastercard', 1, '2024-11-09 09:35:00'),
+('Faktura', 'Klarna', 1, '2024-11-11 13:15:00'),
+('Kort', 'Visa', 1, '2024-11-13 12:25:00'),
+('Swish', 'Swish', 1, '2024-11-14 16:40:00'),
+('Kort', 'Mastercard', 1, '2024-11-15 10:10:00'),
+('Kort', 'Visa', 1, '2024-11-16 14:55:00'),
+('Avbetalning', 'Klarna', 1, '2024-11-17 11:30:00'),
+('Kort', 'Mastercard', 1, '2024-11-18 09:05:00'),
+('Kort', 'Visa', 1, '2024-11-19 15:50:00'),
+('Swish', 'Swish', 1, '2024-11-20 12:20:00'),
+('Kort', 'Mastercard', 1, '2024-11-21 13:45:00'),
+('Kort', 'Visa', 1, '2024-11-22 10:35:00'),
+('Faktura', 'Klarna', 1, '2024-11-23 14:10:00'),
+('Kort', 'Mastercard', 0, '2024-11-24 11:50:00'),
+('Swish', 'Swish', 1, '2024-11-25 09:15:00'),
+('Kort', 'Visa', 1, '2024-11-26 16:30:00'),
+('Kort', 'Mastercard', 1, '2024-11-27 12:05:00'),
+('Avbetalning', 'Klarna', 1, '2024-11-28 13:40:00'),
+('Kort', 'Visa', 1, '2024-11-29 10:25:00'),
+('Kort', 'Mastercard', 1, '2024-11-30 14:55:00'),
+('Swish', 'Swish', 1, '2024-11-02 11:20:00'),
+('Kort', 'Visa', 1, '2024-11-04 15:35:00'),
+('Kort', 'Mastercard', 1, '2024-11-06 10:50:00'),
+('Faktura', 'Klarna', 1, '2024-11-08 13:15:00'),
+('Kort', 'Visa', 1, '2024-11-10 12:40:00'),
+('Kort', 'Mastercard', 1, '2024-11-12 09:55:00'),
+('Swish', 'Swish', 1, '2024-11-19 14:20:00'),
+('Kort', 'Visa', 1, '2024-11-21 11:35:00'),
+('Kort', 'Mastercard', 1, '2024-11-23 15:50:00'),
+('Avbetalning', 'Klarna', 1, '2024-11-25 10:10:00'),
+('Kort', 'Visa', 1, '2024-11-26 13:45:00'),
+('Kort', 'Mastercard', 1, '2024-11-27 12:30:00'),
+('Swish', 'Swish', 1, '2024-11-28 16:05:00'),
 
 -- DECEMBER (33 payments - CHRISTMAS)
-('Kort', 'Visa', 1, '2024-12-01 10:18:15'),           
-('Kort', 'Mastercard', 1, '2024-12-02 15:44:38'),     
-('Swish', 'Swish', 1, '2024-12-03 09:31:22'),         
-('Kort', 'Visa', 1, '2024-12-04 17:09:51'),           
-('Kort', 'Mastercard', 1, '2024-12-05 13:23:44'),     
-('Faktura', 'Klarna', 1, '2024-12-06 20:52:17'),      
-('Kort', 'Visa', 1, '2024-12-07 08:16:33'),           
-('Kort', 'Mastercard', 1, '2024-12-08 16:40:29'),     
-('Swish', 'Swish', 1, '2024-12-09 11:34:45'),         
-('Kort', 'Visa', 1, '2024-12-10 19:15:52'),           
-('Kort', 'Mastercard', 1, '2024-12-11 12:49:14'),     
-('Avbetalning', 'Klarna', 1, '2024-12-12 21:11:36'),  
-('Kort', 'Visa', 1, '2024-12-13 10:36:28'),           
-('Kort', 'Mastercard', 1, '2024-12-14 14:02:47'),     
-('Swish', 'Swish', 1, '2024-12-15 18:28:19'),         
-('Kort', 'Visa', 1, '2024-12-16 09:41:23'),           
-('Kort', 'Mastercard', 1, '2024-12-17 17:16:11'),     
-('Faktura', 'Klarna', 1, '2024-12-18 13:25:47'),      
-('Kort', 'Visa', 1, '2024-12-19 20:09:33'),           
-('Kort', 'Mastercard', 1, '2024-12-20 11:18:18'),     
-('Swish', 'Swish', 1, '2024-12-21 15:44:39'),         
-('Kort', 'Visa', 1, '2024-12-22 08:30:26'),           
-('Kort', 'Mastercard', 1, '2024-12-23 16:15:44'),     
-('Avbetalning', 'Klarna', 1, '2024-12-24 21:23:15'),  
-('Kort', 'Visa', 1, '2024-12-21 10:11:52'),           
-('Kort', 'Mastercard', 1, '2024-12-22 14:36:31'),     
-('Swish', 'Swish', 1, '2024-12-23 12:08:47'),         
-('Kort', 'Visa', 1, '2024-12-24 19:44:28'),           
-('Kort', 'Mastercard', 1, '2024-12-25 09:52:33'),     
-('Faktura', 'Klarna', 1, '2024-12-26 17:29:19'),      
-('Kort', 'Visa', 1, '2024-12-27 11:05:41'),           
-('Kort', 'Mastercard', 1, '2024-12-28 20:21:14'),     
-('Swish', 'Swish', 1, '2024-12-29 13:46:36'),         
-('Kort', 'Visa', 1, '2024-12-30 10:14:52');           
+('Kort', 'Visa', 1, '2024-12-01 10:40:00'),
+('Kort', 'Mastercard', 1, '2024-12-02 14:25:00'),
+('Swish', 'Swish', 1, '2024-12-03 11:50:00'),
+('Kort', 'Visa', 1, '2024-12-04 15:30:00'),
+('Kort', 'Mastercard', 1, '2024-12-05 09:15:00'),
+('Faktura', 'Klarna', 1, '2024-12-06 13:40:00'),
+('Kort', 'Visa', 1, '2024-12-07 12:10:00'),
+('Kort', 'Mastercard', 1, '2024-12-08 16:55:00'),
+('Swish', 'Swish', 1, '2024-12-09 10:20:00'),
+('Kort', 'Visa', 1, '2024-12-10 14:35:00'),
+('Kort', 'Mastercard', 1, '2024-12-11 11:45:00'),
+('Avbetalning', 'Klarna', 1, '2024-12-12 09:25:00'),
+('Kort', 'Visa', 1, '2024-12-13 15:10:00'),
+('Kort', 'Mastercard', 1, '2024-12-14 12:50:00'),
+('Swish', 'Swish', 1, '2024-12-15 13:20:00'),
+('Kort', 'Visa', 1, '2024-12-16 10:05:00'),
+('Kort', 'Mastercard', 1, '2024-12-17 14:40:00'),
+('Faktura', 'Klarna', 1, '2024-12-18 11:55:00'),
+('Kort', 'Visa', 1, '2024-12-19 16:15:00'),
+('Kort', 'Mastercard', 1, '2024-12-20 10:30:00'),
+('Swish', 'Swish', 1, '2024-12-21 13:50:00'),
+('Kort', 'Visa', 1, '2024-12-22 12:20:00'),
+('Kort', 'Mastercard', 1, '2024-12-23 15:45:00'),
+('Avbetalning', 'Klarna', 1, '2024-12-24 09:10:00'),
+('Kort', 'Visa', 1, '2024-12-21 14:35:00'),
+('Kort', 'Mastercard', 1, '2024-12-22 11:50:00'),
+('Swish', 'Swish', 1, '2024-12-23 10:15:00'),
+('Kort', 'Visa', 1, '2024-12-24 16:40:00'),
+('Kort', 'Mastercard', 1, '2024-12-25 12:05:00'),
+('Faktura', 'Klarna', 1, '2024-12-26 13:30:00'),
+('Kort', 'Visa', 1, '2024-12-27 10:50:00'),
+('Kort', 'Mastercard', 1, '2024-12-28 14:15:00'),
+('Swish', 'Swish', 1, '2024-12-29 11:35:00');
+
+
+INSERT INTO dbo.[Order] (PaymentID, CustomerID, OrderDate, OrderStatus, OrderTotalAmount) VALUES
+-- JANUARY (20 orders)
+(1, 1, '2024-01-05 09:15:30', 'Levererat', 24999.00),
+(2, 2, '2024-01-08 14:45:22', 'Levererat', 8999.00),
+(3, 3, '2024-01-10 11:32:15', 'Bearbetas', 12999.00),
+(4, 4, '2024-01-12 19:28:44', 'Levererat', 5999.00),
+(5, 5, '2024-01-15 08:22:10', 'Skickat', 9999.00),
+(6, 6, '2024-01-18 16:54:33', 'Levererat', 3999.00),
+(7, 7, '2024-01-20 13:11:18', 'Bearbetas', 4999.00),
+(8, 8, '2024-01-22 10:47:25', 'Levererat', 7999.00),
+(9, 9, '2024-01-24 21:35:52', 'Skickat', 1999.00),
+(10, 10, '2024-01-26 15:19:07', 'Levererat', 6999.00),
+(11, 11, '2024-01-27 09:44:41', 'Väntande', 2999.00),
+(12, 12, '2024-01-28 17:26:14', 'Levererat', 4499.00),
+(13, 1, '2024-01-29 12:03:56', 'Bearbetas', 11999.00),
+(14, 13, '2024-01-30 20:18:29', 'Levererat', 3699.00),
+(15, 14, '2024-01-02 08:56:12', 'Levererat', 5999.00),
+(16, 15, '2024-01-03 14:33:48', 'Skickat', 2499.00),
+(17, 16, '2024-01-04 10:12:36', 'Levererat', 999.00),
+(18, 17, '2024-01-06 18:47:19', 'Bearbetas', 8999.00),
+(19, 18, '2024-01-07 11:25:05', 'Levererat', 4999.00),
+(20, 19, '2024-01-09 22:14:38', 'Avbrutet', 1999.00),
+
+-- FEBRUARY (12 orders)
+(21, 20, '2024-02-01 09:30:12', 'Levererat', 3999.00),
+(22, 21, '2024-02-05 15:48:33', 'Levererat', 5999.00),
+(23, 22, '2024-02-08 11:17:44', 'Skickat', 7999.00),
+(24, 23, '2024-02-10 19:52:21', 'Bearbetas', 2999.00),
+(25, 24, '2024-02-12 08:41:15', 'Levererat', 4499.00),
+(26, 1, '2024-02-15 16:25:38', 'Levererat', 6999.00),
+(27, 25, '2024-02-18 12:36:49', 'Skickat', 1999.00),
+(28, 26, '2024-02-20 20:19:24', 'Levererat', 9999.00),
+(29, 27, '2024-02-22 10:08:57', 'Bearbetas', 3699.00),
+(30, 28, '2024-02-24 14:53:12', 'Levererat', 2499.00),
+(31, 29, '2024-02-26 21:42:33', 'Väntande', 5999.00),
+(32, 30, '2024-02-28 09:19:44', 'Levererat', 4999.00),
+
+-- MARCH (15 orders)
+(33, 2, '2024-03-02 13:27:16', 'Levererat', 8999.00),
+(34, 31, '2024-03-05 10:15:29', 'Levererat', 3999.00),
+(35, 32, '2024-03-08 17:49:38', 'Bearbetas', 5999.00),
+(36, 33, '2024-03-10 08:34:52', 'Levererat', 12999.00),
+(37, 34, '2024-03-12 15:22:11', 'Skickat', 4999.00),
+(38, 35, '2024-03-15 11:56:44', 'Levererat', 6999.00),
+(39, 36, '2024-03-18 20:11:23', 'Bearbetas', 2999.00),
+(40, 37, '2024-03-20 09:48:35', 'Levererat', 9999.00),
+(41, 38, '2024-03-22 16:33:19', 'Skickat', 3699.00),
+(42, 39, '2024-03-24 12:07:46', 'Levererat', 11999.00),
+(43, 40, '2024-03-26 19:44:12', 'Väntande', 1999.00),
+(44, 3, '2024-03-28 10:21:53', 'Levererat', 7999.00),
+(45, 41, '2024-03-29 14:36:28', 'Bearbetas', 5999.00),
+(46, 42, '2024-03-01 08:12:41', 'Levererat', 4499.00),
+(47, 43, '2024-03-03 18:58:14', 'Levererat', 9999.00),
+
+-- APRIL (15 orders)
+(48, 44, '2024-04-02 11:43:27', 'Levererat', 2999.00),
+(49, 45, '2024-04-05 09:26:35', 'Levererat', 6999.00),
+(50, 46, '2024-04-08 15:39:18', 'Skickat', 4999.00),
+(51, 47, '2024-04-10 20:55:42', 'Bearbetas', 11999.00),
+(52, 48, '2024-04-12 10:14:11', 'Levererat', 3999.00),
+(53, 49, '2024-04-15 16:47:29', 'Levererat', 5999.00),
+(54, 50, '2024-04-18 12:32:53', 'Skickat', 8999.00),
+(55, 4, '2024-04-20 08:19:36', 'Levererat', 7999.00),
+(56, 5, '2024-04-22 17:04:15', 'Bearbetas', 2499.00),
+(57, 51, '2024-04-24 13:50:44', 'Levererat', 4999.00),
+(58, 52, '2024-04-26 21:23:18', 'Väntande', 9999.00),
+(59, 53, '2024-04-27 09:11:52', 'Levererat', 3699.00),
+(60, 54, '2024-04-28 14:45:33', 'Levererat', 1999.00),
+(61, 1, '2024-04-29 11:08:19', 'Levererat', 5999.00),
+(62, 2, '2024-04-30 19:37:47', 'Skickat', 6999.00),
+
+-- MAY (15 orders)
+(63, 3, '2024-05-02 10:22:14', 'Levererat', 8999.00),
+(64, 6, '2024-05-05 16:11:38', 'Levererat', 4999.00),
+(65, 7, '2024-05-08 12:49:25', 'Bearbetas', 2999.00),
+(66, 8, '2024-05-10 08:36:52', 'Levererat', 11999.00),
+(67, 9, '2024-05-12 15:28:19', 'Skickat', 3999.00),
+(68, 10, '2024-05-15 20:44:33', 'Levererat', 5999.00),
+(69, 11, '2024-05-18 09:17:46', 'Bearbetas', 9999.00),
+(70, 12, '2024-05-20 17:02:11', 'Levererat', 7999.00),
+(71, 13, '2024-05-22 13:31:44', 'Skickat', 2499.00),
+(72, 14, '2024-05-24 10:55:28', 'Levererat', 4999.00),
+(73, 15, '2024-05-26 18:20:19', 'Väntande', 6999.00),
+(74, 16, '2024-05-27 11:44:52', 'Levererat', 3699.00),
+(75, 17, '2024-05-28 14:12:37', 'Levererat', 1999.00),
+(76, 18, '2024-05-29 21:33:15', 'Levererat', 5999.00),
+(77, 19, '2024-05-30 09:48:23', 'Skickat', 8999.00),
+
+-- JUNE (10 orders)
+(78, 20, '2024-06-02 15:17:44', 'Levererat', 3999.00),
+(79, 21, '2024-06-05 10:39:12', 'Levererat', 6999.00),
+(80, 22, '2024-06-08 18:52:37', 'Skickat', 4999.00),
+(81, 23, '2024-06-10 12:26:19', 'Bearbetas', 2999.00),
+(82, 24, '2024-06-15 08:44:53', 'Levererat', 11999.00),
+(83, 25, '2024-06-18 16:15:24', 'Levererat', 5999.00),
+(84, 26, '2024-06-20 11:33:46', 'Bearbetas', 8999.00),
+(85, 27, '2024-06-22 20:07:18', 'Levererat', 3699.00),
+(86, 28, '2024-06-25 13:42:29', 'Skickat', 1999.00),
+(87, 29, '2024-06-28 09:19:51', 'Levererat', 7999.00),
+
+-- JULY (10 orders)
+(88, 30, '2024-07-02 17:35:22', 'Levererat', 2999.00),
+(89, 31, '2024-07-05 10:48:14', 'Levererat', 4999.00),
+(90, 1, '2024-07-08 14:21:38', 'Bearbetas', 9999.00),
+(91, 32, '2024-07-10 19:11:45', 'Levererat', 6999.00),
+(92, 33, '2024-07-15 08:53:19', 'Skickat', 3999.00),
+(93, 34, '2024-07-18 15:26:32', 'Levererat', 5999.00),
+(94, 35, '2024-07-20 11:39:47', 'Bearbetas', 11999.00),
+(95, 36, '2024-07-22 20:14:23', 'Levererat', 8999.00),
+(96, 37, '2024-07-25 12:42:16', 'Väntande', 1999.00),
+(97, 38, '2024-07-28 09:27:51', 'Levererat', 7999.00),
+
+-- AUGUST (13 orders)
+(98, 39, '2024-08-01 16:44:38', 'Levererat', 4999.00),
+(99, 40, '2024-08-03 11:12:25', 'Levererat', 2999.00),
+(100, 41, '2024-08-05 18:37:12', 'Skickat', 6999.00),
+(101, 42, '2024-08-08 10:19:44', 'Bearbetas', 9999.00),
+(102, 43, '2024-08-10 15:51:33', 'Levererat', 3699.00),
+(103, 44, '2024-08-12 09:26:18', 'Levererat', 5999.00),
+(104, 45, '2024-08-15 20:48:52', 'Bearbetas', 11999.00),
+(105, 46, '2024-08-18 13:17:29', 'Levererat', 8999.00),
+(106, 47, '2024-08-20 08:35:14', 'Skickat', 1999.00),
+(107, 48, '2024-08-22 17:22:41', 'Levererat', 7999.00),
+(108, 1, '2024-08-24 12:09:37', 'Väntande', 4999.00),
+(109, 49, '2024-08-26 14:44:19', 'Levererat', 3999.00),
+(110, 50, '2024-08-28 10:31:52', 'Levererat', 5999.00),
+
+-- SEPTEMBER (16 orders)
+(111, 51, '2024-09-02 09:15:23', 'Levererat', 12999.00),
+(112, 52, '2024-09-04 16:48:47', 'Levererat', 8999.00),
+(113, 53, '2024-09-06 12:31:15', 'Bearbetas', 2999.00),
+(114, 54, '2024-09-08 20:44:28', 'Levererat', 6999.00),
+(115, 1, '2024-09-10 10:19:52', 'Skickat', 4999.00),
+(116, 2, '2024-09-12 15:36:11', 'Levererat', 9999.00),
+(117, 3, '2024-09-14 08:22:39', 'Bearbetas', 3699.00),
+(118, 4, '2024-09-16 18:11:44', 'Levererat', 11999.00),
+(119, 5, '2024-09-18 13:47:33', 'Levererat', 5999.00),
+(120, 6, '2024-09-20 11:25:19', 'Skickat', 8999.00),
+(121, 7, '2024-09-22 21:13:56', 'Väntande', 1999.00),
+(122, 8, '2024-09-24 09:44:27', 'Levererat', 7999.00),
+(123, 9, '2024-09-26 17:32:14', 'Levererat', 4999.00),
+(124, 10, '2024-09-27 12:18:38', 'Levererat', 2999.00),
+(125, 11, '2024-09-28 14:55:22', 'Bearbetas', 6999.00),
+(126, 12, '2024-09-29 10:03:47', 'Levererat', 3999.00),
+
+-- OCTOBER (16 orders)
+(127, 13, '2024-10-01 15:39:12', 'Levererat', 5999.00),
+(128, 14, '2024-10-03 11:17:35', 'Levererat', 11999.00),
+(129, 15, '2024-10-05 19:44:58', 'Bearbetas', 8999.00),
+(130, 16, '2024-10-07 09:26:21', 'Levererat', 3699.00),
+(131, 17, '2024-10-09 16:52:44', 'Skickat', 1999.00),
+(132, 18, '2024-10-11 13:08:19', 'Levererat', 7999.00),
+(133, 19, '2024-10-13 20:31:37', 'Levererat', 4999.00),
+(134, 20, '2024-10-15 10:47:22', 'Bearbetas', 2999.00),
+(135, 21, '2024-10-17 14:23:51', 'Levererat', 6999.00),
+(136, 22, '2024-10-19 08:36:18', 'Väntande', 3999.00),
+(137, 23, '2024-10-21 17:19:44', 'Levererat', 5999.00),
+(138, 24, '2024-10-23 12:42:33', 'Skickat', 9999.00),
+(139, 25, '2024-10-25 21:15:27', 'Levererat', 12999.00),
+(140, 26, '2024-10-27 09:53:14', 'Levererat', 8999.00),
+(141, 27, '2024-10-29 15:28:46', 'Bearbetas', 2999.00),
+(142, 1, '2024-10-30 11:04:35', 'Levererat', 6999.00),
+
+-- NOVEMBER (37 orders - BLACK FRIDAY)
+(143, 28, '2024-11-01 10:12:44', 'Levererat', 4999.00),
+(144, 29, '2024-11-03 16:38:21', 'Levererat', 11999.00),
+(145, 30, '2024-11-05 13:25:55', 'Bearbetas', 8999.00),
+(146, 31, '2024-11-07 20:47:18', 'Levererat', 3699.00),
+(147, 32, '2024-11-09 09:31:29', 'Skickat', 1999.00),
+(148, 33, '2024-11-11 17:14:36', 'Levererat', 7999.00),
+(149, 34, '2024-11-13 11:49:52', 'Levererat', 4999.00),
+(150, 35, '2024-11-14 14:22:17', 'Bearbetas', 2999.00),
+(151, 2, '2024-11-15 08:44:33', 'Levererat', 6999.00),
+(152, 36, '2024-11-16 18:36:14', 'Väntande', 3999.00),
+(153, 37, '2024-11-17 12:11:48', 'Levererat', 5999.00),
+(154, 38, '2024-11-18 21:27:39', 'Skickat', 9999.00),
+(155, 39, '2024-11-19 10:13:22', 'Levererat', 12999.00),
+(156, 40, '2024-11-20 15:44:51', 'Levererat', 8999.00),
+(157, 41, '2024-11-21 09:19:37', 'Bearbetas', 2999.00),
+(158, 42, '2024-11-22 17:02:14', 'Levererat', 6999.00),
+(159, 43, '2024-11-23 13:35:48', 'Levererat', 4999.00),
+(160, 44, '2024-11-24 20:58:25', 'Skickat', 11999.00),
+(161, 3, '2024-11-25 08:26:19', 'Levererat', 8999.00),
+(162, 45, '2024-11-26 14:51:42', 'Bearbetas', 3699.00),
+(163, 46, '2024-11-27 11:38:57', 'Levererat', 1999.00),
+(164, 47, '2024-11-28 19:12:33', 'Väntande', 7999.00),
+(165, 48, '2024-11-29 12:44:16', 'Levererat', 4999.00),
+(166, 49, '2024-11-30 10:17:29', 'Levererat', 2999.00),
+(167, 4, '2024-11-02 16:23:38', 'Bearbetas', 6999.00),
+(168, 50, '2024-11-04 09:47:52', 'Levererat', 3999.00),
+(169, 51, '2024-11-06 17:15:44', 'Levererat', 5999.00),
+(170, 52, '2024-11-08 13:09:21', 'Skickat', 9999.00),
+(171, 53, '2024-11-10 20:32:15', 'Levererat', 12999.00),
+(172, 54, '2024-11-12 10:58:38', 'Levererat', 8999.00),
+(173, 5, '2024-11-19 15:41:44', 'Bearbetas', 2999.00),
+(174, 1, '2024-11-21 11:26:33', 'Levererat', 6999.00),
+(175, 2, '2024-11-23 18:19:51', 'Levererat', 4999.00),
+(176, 6, '2024-11-25 09:35:28', 'Skickat', 11999.00),
+(177, 7, '2024-11-26 16:48:14', 'Levererat', 3699.00),
+(178, 8, '2024-11-27 12:12:47', 'Väntande', 1999.00),
+(179, 9, '2024-11-28 20:04:32', 'Levererat', 7999.00),
+(180, 10, '2024-11-29 14:39:19', 'Levererat', 5999.00),
+
+-- DECEMBER (33 orders - CHRISTMAS)
+(181, 11, '2024-12-01 10:21:15', 'Levererat', 4999.00),
+(182, 12, '2024-12-02 15:47:38', 'Levererat', 2999.00),
+(183, 13, '2024-12-03 09:34:22', 'Bearbetas', 6999.00),
+(184, 14, '2024-12-04 17:12:51', 'Levererat', 3999.00),
+(185, 15, '2024-12-05 13:26:44', 'Skickat', 5999.00),
+(186, 16, '2024-12-06 20:55:17', 'Levererat', 9999.00),
+(187, 17, '2024-12-07 08:19:33', 'Levererat', 12999.00),
+(188, 18, '2024-12-08 16:43:29', 'Bearbetas', 8999.00),
+(189, 19, '2024-12-09 11:37:45', 'Levererat', 2999.00),
+(190, 20, '2024-12-10 19:18:52', 'Väntande', 6999.00),
+(191, 21, '2024-12-11 12:52:14', 'Levererat', 4999.00),
+(192, 22, '2024-12-12 21:14:36', 'Skickat', 11999.00),
+(193, 23, '2024-12-13 10:39:28', 'Levererat', 3699.00),
+(194, 24, '2024-12-14 14:05:47', 'Levererat', 1999.00),
+(195, 25, '2024-12-15 18:31:19', 'Levererat', 7999.00),
+(196, 26, '2024-12-16 09:44:23', 'Bearbetas', 5999.00),
+(197, 27, '2024-12-17 17:19:11', 'Levererat', 8999.00),
+(198, 28, '2024-12-18 13:28:47', 'Levererat', 4999.00),
+(199, 29, '2024-12-19 20:12:33', 'Skickat', 2999.00),
+(200, 30, '2024-12-20 11:21:18', 'Levererat', 6999.00),
+(201, 1, '2024-12-21 15:47:39', 'Väntande', 3999.00),
+(202, 31, '2024-12-22 08:33:26', 'Levererat', 5999.00),
+(203, 32, '2024-12-23 16:18:44', 'Levererat', 9999.00),
+(204, 33, '2024-12-24 21:26:15', 'Bearbetas', 11999.00),
+(205, 34, '2024-12-21 10:14:52', 'Levererat', 8999.00),
+(206, 35, '2024-12-22 14:39:31', 'Levererat', 2999.00),
+(207, 36, '2024-12-23 12:11:47', 'Skickat', 6999.00),
+(208, 37, '2024-12-24 19:47:28', 'Levererat', 4999.00),
+(209, 38, '2024-12-25 09:55:33', 'Väntande', 11999.00),
+(210, 39, '2024-12-26 17:32:19', 'Levererat', 3699.00),
+(211, 40, '2024-12-27 11:08:41', 'Levererat', 1999.00),
+(212, 41, '2024-12-28 20:24:14', 'Levererat', 7999.00),
+(213, 2, '2024-12-29 13:49:36', 'Bearbetas', 5999.00),
+(214, 3, '2024-12-30 10:17:52', 'Levererat', 8999.00);
 
 
 
