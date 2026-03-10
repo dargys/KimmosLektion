@@ -361,7 +361,7 @@ INSERT INTO dbo.Customer (FirstName, LastName, Email, Phone) VALUES
 ('Johan', 'Bryntsson', 'johan.bryntsson@outlook.se', NULL),
 ('Kajsa', 'Brunström', 'kajsa.brunstrom@gmail.com', '0707889990'),
 ('Lennart', 'Cedström', 'lennart.cedstrom@outlook.se', '0708990001'),
-('Marta', 'Dahlstr�m', 'marta.dahlstrom@gmail.com', '0700001112'),
+('Marta', 'Dahlström', 'marta.dahlstrom@gmail.com', '0700001112'),
 ('Nils', 'Danielsson', 'nils.danielsson@outlook.se', NULL),
 ('Olivia', 'Dohlström', 'olivia.dohlstrom@gmail.com', '0701112223'),
 ('P�r', 'Eklund', 'par.eklund@outlook.se', '0702223334'),
