@@ -1,4 +1,4 @@
-IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'NetOnNet')
+ï»¿IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'NetOnNet')
   BEGIN
     CREATE DATABASE NetOnNet
     END
@@ -98,7 +98,7 @@ CREATE TABLE dbo.[Order] (
     OrderTotalAmount DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (CustomerID) REFERENCES dbo.Customer(CustomerID),
     FOREIGN KEY (PaymentID) REFERENCES dbo.Payment (PaymentID),
-    CONSTRAINT CK_OrderStatus CHECK (OrderStatus IN('Väntande','Bearbetas', 'Skickat','Levererat', 'Avbrutet','Returerat'))
+    CONSTRAINT CK_OrderStatus CHECK (OrderStatus IN('VÃ¤ntande','Bearbetas', 'Skickat','Levererat', 'Avbrutet','Returerat'))
 )
 END;
 GO
@@ -134,8 +134,8 @@ CREATE TABLE dbo.[Return] (
     [Status]      NVARCHAR(20) NOT NULL,
     Notes       NVARCHAR(MAX),
     FOREIGN KEY (OrderItemID) REFERENCES dbo.OrderItem(OrderItemID),
-    CONSTRAINT CK_ReturnReason CHECK (Reason IN ('Defekt', 'StämmerInte', 'Skadad', 'KundRequest', 'Övrigt')),
-    CONSTRAINT CK_ReturnStatus CHECK ([Status] IN ('Initierad', 'Godkänd', 'Avvisad', 'Slutförd'))
+    CONSTRAINT CK_ReturnReason CHECK (Reason IN ('Defekt', 'StÃ¤mmerInte', 'Skadad', 'KundRequest', 'Ã–vrigt')),
+    CONSTRAINT CK_ReturnStatus CHECK ([Status] IN ('Initierad', 'GodkÃ¤nd', 'Avvisad', 'SlutfÃ¶rd'))
 )
 END;
 GO
@@ -152,13 +152,13 @@ INSERT INTO dbo.Category (CategoryName) VALUES
 ('Datorkomponenter'),
 ('Gaming'),
 ('Hem & Fritid'),
-('Personvård'),
+('PersonvÃ¥rd'),
 ('TV'),
 ('Ljud'),
 ('Mobil & Smartwatch'),
 ('Vitvaror'),
 ('Kamera & Foto'),
-('Tillbehör');
+('TillbehÃ¶r');
 
 INSERT INTO dbo.SubCategory (CategoryID, SubCategoryName) VALUES
 -- Dator & Surfplatta (CategoryID 1) - 4 subcategories
@@ -186,7 +186,7 @@ INSERT INTO dbo.SubCategory (CategoryID, SubCategoryName) VALUES
 (4, 'Furniture'),
 (4, 'Lighting'),
 
--- Personvård (CategoryID 5) - 3 subcategories
+-- PersonvÃ¥rd (CategoryID 5) - 3 subcategories
 (5, 'Hair Care'),
 (5, 'Skincare'),
 (5, 'Health Devices'),
@@ -217,7 +217,7 @@ INSERT INTO dbo.SubCategory (CategoryID, SubCategoryName) VALUES
 (10, 'Mirrorless Cameras'),
 (10, 'Lenses'),
 
--- Tillbehör (CategoryID 11) - 5 subcategories
+-- TillbehÃ¶r (CategoryID 11) - 5 subcategories
 (11, 'Phone Cases'),
 (11, 'Cables'),
 (11, 'Chargers'),
@@ -303,7 +303,7 @@ INSERT INTO dbo.[Product] (SubCategoryID, SKU, ProductName, Price, Cost, Color, 
 (17, 'HOME-006', 'Philips Hue Smart Bulbs', 1299.00, 780.00, 'White', GETDATE(), '{"brand": "Philips", "model": "Hue White A19", "warrantyYears": 2, "specifications": {"brightness": "1600 lumens", "color_temperature": "2700K 6500K", "connectivity": "Bluetooth ZigBee", "lifespan": "25000 hours"}}'),
 
 -- ========================================
--- PERSONVÅRD (5 products)
+-- PERSONVï¿½RD (5 products)
 -- ========================================
 
 -- Hair Care (SubCategoryID 18) - 2 products
@@ -413,7 +413,7 @@ INSERT INTO dbo.[Product] (SubCategoryID, SKU, ProductName, Price, Cost, Color, 
 (36, 'CAM-008', 'Fujifilm XF 35mm f/1.4 R', 1999.00, 1200.00, 'Black', GETDATE(), '{"brand": "Fujifilm", "model": "XF 35mm f/1.4 R", "warrantyYears": 2, "specifications": {"focal_length": "35mm", "aperture": "f/1.4", "elements": "8 elements", "filter_size": "52mm"}}'),
 
 -- ========================================
--- TILLBEHÖR (12 products)
+-- TILLBEHï¿½R (12 products)
 -- ========================================
 
 -- Phone Cases (SubCategoryID 37) - 3 products
@@ -442,10 +442,10 @@ INSERT INTO dbo.[Product] (SubCategoryID, SKU, ProductName, Price, Cost, Color, 
 INSERT INTO dbo.Customer (FirstName, LastName, Email, Phone) VALUES
 ('Anders', 'Svensson', 'anders.svensson@gmail.com', '0701234567'),
 ('Birgitta', 'Andersson', 'birgitta.andersson@outlook.se', NULL),
-('Carl', 'Bergström', 'carl.bergstrom@gmail.com', '0709876543'),
+('Carl', 'BergstrÃ¶m', 'carl.bergstrom@gmail.com', '0709876543'),
 ('Dagny', 'Carlsson', 'dagny.carlsson@outlook.se', '0702345678'),
 ('Erik', 'Dahlqvist', 'erik.dahlqvist@gmail.com', NULL),
-('Freja', 'Ekström', 'freja.ekstrom@outlook.se', '0703456789'),
+('Freja', 'EkstrÃ¶m', 'freja.ekstrom@outlook.se', '0703456789'),
 ('Gunnar', 'Fransson', 'gunnar.fransson@gmail.com', '0704567890'),
 ('Hilda', 'Gustafsson', 'hilda.gustafsson@outlook.se', '0705678901'),
 ('Ivar', 'Hansson', 'ivar.hansson@gmail.com', NULL),
@@ -453,39 +453,39 @@ INSERT INTO dbo.Customer (FirstName, LastName, Email, Phone) VALUES
 ('Knut', 'Jansson', 'knut.jansson@gmail.com', '0707890123'),
 ('Linnea', 'Karlsson', 'linnea.karlsson@outlook.se', '0708901234'),
 ('Magnus', 'Larsson', 'magnus.larsson@gmail.com', NULL),
-('Nina', 'Lundström', 'nina.lundstrom@outlook.se', '0709012345'),
+('Nina', 'LundstrÃ¶m', 'nina.lundstrom@outlook.se', '0709012345'),
 ('Olof', 'Mattsson', 'olof.mattsson@gmail.com', '0700123456'),
 ('Pernilla', 'Nilsson', 'pernilla.nilsson@outlook.se', '0701112222'),
 ('Quinton', 'Olsson', 'quinton.olsson@gmail.com', NULL),
 ('Rune', 'Pettersson', 'rune.pettersson@outlook.se', '0702223333'),
-('Sigrid', 'Qvarnström', 'sigrid.qvarnstrom@gmail.com', '0703334444'),
+('Sigrid', 'QvarnstrÃ¶m', 'sigrid.qvarnstrom@gmail.com', '0703334444'),
 ('Torsten', 'Ragnarsson', 'torsten.ragnarsson@outlook.se', '0704445555'),
-('Ulla', 'Sahlström', 'ulla.sahlstrom@gmail.com', NULL),
+('Ulla', 'SahlstrÃ¶m', 'ulla.sahlstrom@gmail.com', NULL),
 ('Viktor', 'Tagesson', 'viktor.tagesson@outlook.se', '0705556666'),
-('Wendla', 'Udén', 'wendla.uden@gmail.com', '0706667777'),
+('Wendla', 'UdÃ¶n', 'wendla.uden@gmail.com', '0706667777'),
 ('Xerxes', 'Viklund', 'xerxes.viklund@outlook.se', NULL),
 ('Yoko', 'Wahl', 'yoko.wahl@gmail.com', '0708889999'),
 ('Zigge', 'Xanthopoulos', 'zigge.xanthopoulos@outlook.se', '0707778888'),
-('Astrid', 'Åberg', 'astrid.aberg@gmail.com', '0700011111'),
-('Bengt', 'Åström', 'bengt.astrom@outlook.se', NULL),
-('Cecilia', 'Börjelsson', 'cecilia.borjelsson@gmail.com', '0701223334'),
-('Didrik', 'Öberg', 'didrik.oberg@outlook.se', '0702334445'),
-('Ebba', 'Östberg', 'ebba.ostberg@gmail.com', '0703445556'),
-('Fredrik', 'Åkerman', 'fredrik.akerman@outlook.se', NULL),
+('Astrid', 'Ã…berg', 'astrid.aberg@gmail.com', '0700011111'),
+('Bengt', 'Ã…strÃ¶m', 'bengt.astrom@outlook.se', NULL),
+('Cecilia', 'BÃ¶rjelsson', 'cecilia.borjelsson@gmail.com', '0701223334'),
+('Didrik', 'Ã…berg', 'didrik.oberg@outlook.se', '0702334445'),
+('Ebba', 'Ã…stberg', 'ebba.ostberg@gmail.com', '0703445556'),
+('Fredrik', 'Ã…kerman', 'fredrik.akerman@outlook.se', NULL),
 ('Greta', 'Blomqvist', 'greta.blomqvist@gmail.com', '0704556667'),
-('Harald', 'Borgström', 'harald.borgstrom@outlook.se', '0705667778'),
-('Ingrid', 'Bredström', 'ingrid.bredstrom@gmail.com', '0706778889'),
+('Harald', 'BorgstrÃ¶m', 'harald.borgstrom@outlook.se', '0705667778'),
+('Ingrid', 'BredstrÃ¶m', 'ingrid.bredstrom@gmail.com', '0706778889'),
 ('Johan', 'Bryntsson', 'johan.bryntsson@outlook.se', NULL),
-('Kajsa', 'Brunström', 'kajsa.brunstrom@gmail.com', '0707889990'),
-('Lennart', 'Cedström', 'lennart.cedstrom@outlook.se', '0708990001'),
-('Marta', 'Dahlström', 'marta.dahlstrom@gmail.com', '0700001112'),
+('Kajsa', 'BrunstrÃ¶m', 'kajsa.brunstrom@gmail.com', '0707889990'),
+('Lennart', 'CedstrÃ¶m', 'lennart.cedstrom@outlook.se', '0708990001'),
+('Marta', 'Dahlstrï¿½m', 'marta.dahlstrom@gmail.com', '0700001112'),
 ('Nils', 'Danielsson', 'nils.danielsson@outlook.se', NULL),
-('Olivia', 'Dohlström', 'olivia.dohlstrom@gmail.com', '0701112223'),
-('Pär', 'Eklund', 'par.eklund@outlook.se', '0702223334'),
-('Ragnhild', 'Engström', 'ragnhild.engstrom@gmail.com', '0703334445'),
+('Olivia', 'DohlstrÃ¶m', 'olivia.dohlstrom@gmail.com', '0701112223'),
+('Pï¿½r', 'Eklund', 'par.eklund@outlook.se', '0702223334'),
+('Ragnhild', 'EngstrÃ¶m', 'ragnhild.engstrom@gmail.com', '0703334445'),
 ('Sture', 'Ericsson', 'sture.ericsson@outlook.se', NULL),
 ('Tekla', 'Eriksson', 'tekla.eriksson@gmail.com', '0704445556'),
-('Urban', 'Fernström', 'urban.fernstrom@outlook.se', '0705556667'),
+('Urban', 'FernstrÃ¶m', 'urban.fernstrom@outlook.se', '0705556667'),
 ('Viveca', 'Fritzson', 'viveca.fritzson@gmail.com', '0706667778'),
 ('Wolff', 'Gabrielsson', 'wolff.gabrielsson@outlook.se', NULL),
 ('Ximena', 'Gartner', 'ximena.gartner@gmail.com', '0707778889'),
@@ -989,7 +989,7 @@ INSERT INTO dbo.[Order] (PaymentID, CustomerID, OrderDate, OrderStatus, OrderTot
 (8, 8, '2024-01-22 10:47:25', 'Levererat', 7999.00),
 (9, 9, '2024-01-24 21:35:52', 'Skickat', 1999.00),
 (10, 10, '2024-01-26 15:19:07', 'Levererat', 6999.00),
-(11, 11, '2024-01-27 09:44:41', 'Väntande', 2999.00),
+(11, 11, '2024-01-27 09:44:41', 'VÃ¤ntande', 2999.00),
 (12, 12, '2024-01-28 17:26:14', 'Levererat', 4499.00),
 (13, 1, '2024-01-29 12:03:56', 'Bearbetas', 11999.00),
 (14, 13, '2024-01-30 20:18:29', 'Levererat', 3699.00),
@@ -1011,7 +1011,7 @@ INSERT INTO dbo.[Order] (PaymentID, CustomerID, OrderDate, OrderStatus, OrderTot
 (28, 26, '2024-02-20 20:19:24', 'Levererat', 9999.00),
 (29, 27, '2024-02-22 10:08:57', 'Bearbetas', 3699.00),
 (30, 28, '2024-02-24 14:53:12', 'Levererat', 2499.00),
-(31, 29, '2024-02-26 21:42:33', 'Väntande', 5999.00),
+(31, 29, '2024-02-26 21:42:33', 'VÃ¤ntande', 5999.00),
 (32, 30, '2024-02-28 09:19:44', 'Levererat', 4999.00),
 
 -- MARCH (15 orders)
@@ -1025,7 +1025,7 @@ INSERT INTO dbo.[Order] (PaymentID, CustomerID, OrderDate, OrderStatus, OrderTot
 (40, 37, '2024-03-20 09:48:35', 'Levererat', 9999.00),
 (41, 38, '2024-03-22 16:33:19', 'Skickat', 3699.00),
 (42, 39, '2024-03-24 12:07:46', 'Levererat', 11999.00),
-(43, 40, '2024-03-26 19:44:12', 'Väntande', 1999.00),
+(43, 40, '2024-03-26 19:44:12', 'VÃ¤ntande', 1999.00),
 (44, 3, '2024-03-28 10:21:53', 'Levererat', 7999.00),
 (45, 41, '2024-03-29 14:36:28', 'Bearbetas', 5999.00),
 (46, 42, '2024-03-01 08:12:41', 'Levererat', 4499.00),
@@ -1042,7 +1042,7 @@ INSERT INTO dbo.[Order] (PaymentID, CustomerID, OrderDate, OrderStatus, OrderTot
 (55, 4, '2024-04-20 08:19:36', 'Levererat', 7999.00),
 (56, 5, '2024-04-22 17:04:15', 'Bearbetas', 2499.00),
 (57, 51, '2024-04-24 13:50:44', 'Levererat', 4999.00),
-(58, 52, '2024-04-26 21:23:18', 'Väntande', 9999.00),
+(58, 52, '2024-04-26 21:23:18', 'VÃ¤ntande', 9999.00),
 (59, 53, '2024-04-27 09:11:52', 'Levererat', 3699.00),
 (60, 54, '2024-04-28 14:45:33', 'Levererat', 1999.00),
 (61, 1, '2024-04-29 11:08:19', 'Levererat', 5999.00),
@@ -1059,7 +1059,7 @@ INSERT INTO dbo.[Order] (PaymentID, CustomerID, OrderDate, OrderStatus, OrderTot
 (70, 12, '2024-05-20 17:02:11', 'Levererat', 7999.00),
 (71, 13, '2024-05-22 13:31:44', 'Skickat', 2499.00),
 (72, 14, '2024-05-24 10:55:28', 'Levererat', 4999.00),
-(73, 15, '2024-05-26 18:20:19', 'Väntande', 6999.00),
+(73, 15, '2024-05-26 18:20:19', 'VÃ¤ntande', 6999.00),
 (74, 16, '2024-05-27 11:44:52', 'Levererat', 3699.00),
 (75, 17, '2024-05-28 14:12:37', 'Levererat', 1999.00),
 (76, 18, '2024-05-29 21:33:15', 'Levererat', 5999.00),
@@ -1086,7 +1086,7 @@ INSERT INTO dbo.[Order] (PaymentID, CustomerID, OrderDate, OrderStatus, OrderTot
 (93, 34, '2024-07-18 15:26:32', 'Levererat', 5999.00),
 (94, 35, '2024-07-20 11:39:47', 'Bearbetas', 11999.00),
 (95, 36, '2024-07-22 20:14:23', 'Levererat', 8999.00),
-(96, 37, '2024-07-25 12:42:16', 'Väntande', 1999.00),
+(96, 37, '2024-07-25 12:42:16', 'VÃ¤ntande', 1999.00),
 (97, 38, '2024-07-28 09:27:51', 'Levererat', 7999.00),
 
 -- AUGUST (13 orders)
@@ -1100,7 +1100,7 @@ INSERT INTO dbo.[Order] (PaymentID, CustomerID, OrderDate, OrderStatus, OrderTot
 (105, 46, '2024-08-18 13:17:29', 'Levererat', 8999.00),
 (106, 47, '2024-08-20 08:35:14', 'Skickat', 1999.00),
 (107, 48, '2024-08-22 17:22:41', 'Levererat', 7999.00),
-(108, 1, '2024-08-24 12:09:37', 'Väntande', 4999.00),
+(108, 1, '2024-08-24 12:09:37', 'VÃ¤ntande', 4999.00),
 (109, 49, '2024-08-26 14:44:19', 'Levererat', 3999.00),
 (110, 50, '2024-08-28 10:31:52', 'Levererat', 5999.00),
 
@@ -1115,7 +1115,7 @@ INSERT INTO dbo.[Order] (PaymentID, CustomerID, OrderDate, OrderStatus, OrderTot
 (118, 4, '2024-09-16 18:11:44', 'Levererat', 11999.00),
 (119, 5, '2024-09-18 13:47:33', 'Levererat', 5999.00),
 (120, 6, '2024-09-20 11:25:19', 'Skickat', 8999.00),
-(121, 7, '2024-09-22 21:13:56', 'Väntande', 1999.00),
+(121, 7, '2024-09-22 21:13:56', 'VÃ¤ntande', 1999.00),
 (122, 8, '2024-09-24 09:44:27', 'Levererat', 7999.00),
 (123, 9, '2024-09-26 17:32:14', 'Levererat', 4999.00),
 (124, 10, '2024-09-27 12:18:38', 'Levererat', 2999.00),
@@ -1132,7 +1132,7 @@ INSERT INTO dbo.[Order] (PaymentID, CustomerID, OrderDate, OrderStatus, OrderTot
 (133, 19, '2024-10-13 20:31:37', 'Levererat', 4999.00),
 (134, 20, '2024-10-15 10:47:22', 'Bearbetas', 2999.00),
 (135, 21, '2024-10-17 14:23:51', 'Levererat', 6999.00),
-(136, 22, '2024-10-19 08:36:18', 'Väntande', 3999.00),
+(136, 22, '2024-10-19 08:36:18', 'VÃ¤ntande', 3999.00),
 (137, 23, '2024-10-21 17:19:44', 'Levererat', 5999.00),
 (138, 24, '2024-10-23 12:42:33', 'Skickat', 9999.00),
 (139, 25, '2024-10-25 21:15:27', 'Levererat', 12999.00),
@@ -1150,7 +1150,7 @@ INSERT INTO dbo.[Order] (PaymentID, CustomerID, OrderDate, OrderStatus, OrderTot
 (149, 34, '2024-11-13 11:49:52', 'Levererat', 4999.00),
 (150, 35, '2024-11-14 14:22:17', 'Bearbetas', 2999.00),
 (151, 2, '2024-11-15 08:44:33', 'Levererat', 6999.00),
-(152, 36, '2024-11-16 18:36:14', 'Väntande', 3999.00),
+(152, 36, '2024-11-16 18:36:14', 'VÃ¤ntande', 3999.00),
 (153, 37, '2024-11-17 12:11:48', 'Levererat', 5999.00),
 (154, 38, '2024-11-18 21:27:39', 'Skickat', 9999.00),
 (155, 39, '2024-11-19 10:13:22', 'Levererat', 12999.00),
@@ -1162,7 +1162,7 @@ INSERT INTO dbo.[Order] (PaymentID, CustomerID, OrderDate, OrderStatus, OrderTot
 (161, 3, '2024-11-25 08:26:19', 'Levererat', 8999.00),
 (162, 45, '2024-11-26 14:51:42', 'Bearbetas', 3699.00),
 (163, 46, '2024-11-27 11:38:57', 'Levererat', 1999.00),
-(164, 47, '2024-11-28 19:12:33', 'Väntande', 7999.00),
+(164, 47, '2024-11-28 19:12:33', 'VÃ¤ntande', 7999.00),
 (165, 48, '2024-11-29 12:44:16', 'Levererat', 4999.00),
 (166, 49, '2024-11-30 10:17:29', 'Levererat', 2999.00),
 (167, 4, '2024-11-02 16:23:38', 'Bearbetas', 6999.00),
@@ -1176,7 +1176,7 @@ INSERT INTO dbo.[Order] (PaymentID, CustomerID, OrderDate, OrderStatus, OrderTot
 (175, 2, '2024-11-23 18:19:51', 'Levererat', 4999.00),
 (176, 6, '2024-11-25 09:35:28', 'Skickat', 11999.00),
 (177, 7, '2024-11-26 16:48:14', 'Levererat', 3699.00),
-(178, 8, '2024-11-27 12:12:47', 'Väntande', 1999.00),
+(178, 8, '2024-11-27 12:12:47', 'VÃ¤ntande', 1999.00),
 (179, 9, '2024-11-28 20:04:32', 'Levererat', 7999.00),
 (180, 10, '2024-11-29 14:39:19', 'Levererat', 5999.00),
 
@@ -1190,7 +1190,7 @@ INSERT INTO dbo.[Order] (PaymentID, CustomerID, OrderDate, OrderStatus, OrderTot
 (187, 17, '2024-12-07 08:19:33', 'Levererat', 12999.00),
 (188, 18, '2024-12-08 16:43:29', 'Bearbetas', 8999.00),
 (189, 19, '2024-12-09 11:37:45', 'Levererat', 2999.00),
-(190, 20, '2024-12-10 19:18:52', 'Väntande', 6999.00),
+(190, 20, '2024-12-10 19:18:52', 'VÃ¤ntande', 6999.00),
 (191, 21, '2024-12-11 12:52:14', 'Levererat', 4999.00),
 (192, 22, '2024-12-12 21:14:36', 'Skickat', 11999.00),
 (193, 23, '2024-12-13 10:39:28', 'Levererat', 3699.00),
@@ -1201,7 +1201,7 @@ INSERT INTO dbo.[Order] (PaymentID, CustomerID, OrderDate, OrderStatus, OrderTot
 (198, 28, '2024-12-18 13:28:47', 'Levererat', 4999.00),
 (199, 29, '2024-12-19 20:12:33', 'Skickat', 2999.00),
 (200, 30, '2024-12-20 11:21:18', 'Levererat', 6999.00),
-(201, 1, '2024-12-21 15:47:39', 'Väntande', 3999.00),
+(201, 1, '2024-12-21 15:47:39', 'VÃ¤ntande', 3999.00),
 (202, 31, '2024-12-22 08:33:26', 'Levererat', 5999.00),
 (203, 32, '2024-12-23 16:18:44', 'Levererat', 9999.00),
 (204, 33, '2024-12-24 21:26:15', 'Bearbetas', 11999.00),
@@ -1209,7 +1209,7 @@ INSERT INTO dbo.[Order] (PaymentID, CustomerID, OrderDate, OrderStatus, OrderTot
 (206, 35, '2024-12-22 14:39:31', 'Levererat', 2999.00),
 (207, 36, '2024-12-23 12:11:47', 'Skickat', 6999.00),
 (208, 37, '2024-12-24 19:47:28', 'Levererat', 4999.00),
-(209, 38, '2024-12-25 09:55:33', 'Väntande', 11999.00),
+(209, 38, '2024-12-25 09:55:33', 'VÃ¤ntande', 11999.00),
 (210, 39, '2024-12-26 17:32:19', 'Levererat', 3699.00),
 (211, 40, '2024-12-27 11:08:41', 'Levererat', 1999.00),
 (212, 41, '2024-12-28 20:24:14', 'Levererat', 7999.00),
@@ -1998,30 +1998,30 @@ INSERT INTO dbo.OrderItem (OrderID, ProductID, Quantity, LineTotal, DiscountAppl
 
 
 INSERT INTO dbo.[Return] (OrderItemID, ReturnDate, Reason, [Status], Notes) VALUES
-(15, '2025-03-10', 'Defekt', 'Godkänd', 'Returnerad artikel - Returnerat belopp: 8999.00 SEK'),
-(42, '2025-03-15', 'StämmerInte', 'Initierad', 'Returnerad artikel - Returnerat belopp: 3499.00 SEK'),
-(67, '2025-03-20', 'Skadad', 'Slutförd', 'Returnerad artikel - Returnerat belopp: 14999.00 SEK'),
-(89, '2025-03-18', 'KundRequest', 'Godkänd', 'Returnerad artikel - Returnerat belopp: 1299.00 SEK'),
-(103, '2025-03-22', 'Övrigt', 'Avvisad', 'Returnerad artikel - Returnerat belopp: 599.00 SEK'),
+(15, '2025-03-10', 'Defekt', 'GodkÃ¤nd', 'Returnerad artikel - Returnerat belopp: 8999.00 SEK'),
+(42, '2025-03-15', 'StÃ¤mmerInte', 'Initierad', 'Returnerad artikel - Returnerat belopp: 3499.00 SEK'),
+(67, '2025-03-20', 'Skadad', 'SlutfÃ¶rd', 'Returnerad artikel - Returnerat belopp: 14999.00 SEK'),
+(89, '2025-03-18', 'KundRequest', 'GodkÃ¤nd', 'Returnerad artikel - Returnerat belopp: 1299.00 SEK'),
+(103, '2025-03-22', 'Ã–vrigt', 'Avvisad', 'Returnerad artikel - Returnerat belopp: 599.00 SEK'),
 (128, '2025-03-25', 'Defekt', 'Initierad', 'Returnerad artikel - Returnerat belopp: 4999.00 SEK'),
-(145, '2025-03-28', 'StämmerInte', 'Godkänd', 'Returnerad artikel - Returnerat belopp: 6999.00 SEK'),
-(162, '2025-04-02', 'Skadad', 'Slutförd', 'Returnerad artikel - Returnerat belopp: 11999.00 SEK'),
-(178, '2025-04-05', 'Defekt', 'Godkänd', 'Returnerad artikel - Returnerat belopp: 7999.00 SEK'),
+(145, '2025-03-28', 'StÃ¤mmerInte', 'GodkÃ¤nd', 'Returnerad artikel - Returnerat belopp: 6999.00 SEK'),
+(162, '2025-04-02', 'Skadad', 'SlutfÃ¶rd', 'Returnerad artikel - Returnerat belopp: 11999.00 SEK'),
+(178, '2025-04-05', 'Defekt', 'GodkÃ¤nd', 'Returnerad artikel - Returnerat belopp: 7999.00 SEK'),
 (195, '2025-04-10', 'KundRequest', 'Initierad', 'Returnerad artikel - Returnerat belopp: 3999.00 SEK'),
-(210, '2025-04-12', 'StämmerInte', 'Avvisad', 'Returnerad artikel - Returnerat belopp: 1999.00 SEK'),
-(228, '2025-04-15', 'Övrigt', 'Godkänd', 'Returnerad artikel - Returnerat belopp: 9999.00 SEK'),
-(245, '2025-04-20', 'Defekt', 'Slutförd', 'Returnerad artikel - Returnerat belopp: 24999.00 SEK'),
+(210, '2025-04-12', 'StÃ¤mmerInte', 'Avvisad', 'Returnerad artikel - Returnerat belopp: 1999.00 SEK'),
+(228, '2025-04-15', 'Ã–vrigt', 'GodkÃ¤nd', 'Returnerad artikel - Returnerat belopp: 9999.00 SEK'),
+(245, '2025-04-20', 'Defekt', 'SlutfÃ¶rd', 'Returnerad artikel - Returnerat belopp: 24999.00 SEK'),
 (262, '2025-04-22', 'Skadad', 'Initierad', 'Returnerad artikel - Returnerat belopp: 2499.00 SEK'),
-(278, '2025-04-25', 'KundRequest', 'Godkänd', 'Returnerad artikel - Returnerat belopp: 5999.00 SEK'),
-(295, '2025-05-01', 'StämmerInte', 'Slutförd', 'Returnerad artikel - Returnerat belopp: 749.00 SEK'),
-(312, '2025-05-05', 'Defekt', 'Godkänd', 'Returnerad artikel - Returnerat belopp: 14999.00 SEK'),
-(328, '2025-05-08', 'Övrigt', 'Initierad', 'Returnerad artikel - Returnerat belopp: 1299.00 SEK'),
+(278, '2025-04-25', 'KundRequest', 'GodkÃ¤nd', 'Returnerad artikel - Returnerat belopp: 5999.00 SEK'),
+(295, '2025-05-01', 'StÃ¤mmerInte', 'SlutfÃ¶rd', 'Returnerad artikel - Returnerat belopp: 749.00 SEK'),
+(312, '2025-05-05', 'Defekt', 'GodkÃ¤nd', 'Returnerad artikel - Returnerat belopp: 14999.00 SEK'),
+(328, '2025-05-08', 'Ã–vrigt', 'Initierad', 'Returnerad artikel - Returnerat belopp: 1299.00 SEK'),
 (345, '2025-05-12', 'Skadad', 'Avvisad', 'Returnerad artikel - Returnerat belopp: 3999.00 SEK'),
-(346, '2025-05-15', 'KundRequest', 'Slutförd', 'Returnerad artikel - Returnerat belopp: 12999.00 SEK'),
-(38, '2025-05-20', 'StämmerInte', 'Godkänd', 'Returnerad artikel - Returnerat belopp: 449.00 SEK'),
+(346, '2025-05-15', 'KundRequest', 'SlutfÃ¶rd', 'Returnerad artikel - Returnerat belopp: 12999.00 SEK'),
+(38, '2025-05-20', 'StÃ¤mmerInte', 'GodkÃ¤nd', 'Returnerad artikel - Returnerat belopp: 449.00 SEK'),
 (347, '2025-05-25', 'Defekt', 'Initierad', 'Returnerad artikel - Returnerat belopp: 6999.00 SEK'),
-(348, '2025-06-01', 'Övrigt', 'Slutförd', 'Returnerad artikel - Returnerat belopp: 9999.00 SEK'),
-(328, '2025-06-05', 'Skadad', 'Godkänd', 'Returnerad artikel - Returnerat belopp: 4999.00 SEK'),
+(348, '2025-06-01', 'Ã–vrigt', 'SlutfÃ¶rd', 'Returnerad artikel - Returnerat belopp: 9999.00 SEK'),
+(328, '2025-06-05', 'Skadad', 'GodkÃ¤nd', 'Returnerad artikel - Returnerat belopp: 4999.00 SEK'),
 (315, '2025-06-10', 'KundRequest', 'Avvisad', 'Returnerad artikel - Returnerat belopp: 1499.00 SEK'),
-(311, '2025-06-15', 'StämmerInte', 'Initierad', 'Returnerad artikel - Returnerat belopp: 7999.00 SEK'),
-(310, '2025-06-20', 'Defekt', 'Slutförd', 'Returnerad artikel - Returnerat belopp: 34999.00 SEK');
+(311, '2025-06-15', 'StÃ¤mmerInte', 'Initierad', 'Returnerad artikel - Returnerat belopp: 7999.00 SEK'),
+(310, '2025-06-20', 'Defekt', 'SlutfÃ¶rd', 'Returnerad artikel - Returnerat belopp: 34999.00 SEK');
