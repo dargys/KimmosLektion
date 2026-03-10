@@ -19,25 +19,67 @@ GO
 -- 2. Drop tables - in dependency order (to be able to rerun the syntax)
 
 IF OBJECT_ID('dbo.FactSales','U') IS NOT NULL DROP TABLE dbo.FactSales;
+
 IF OBJECT_ID('dbo.DimPayment','U') IS NOT NULL DROP TABLE dbo.DimPayment;
+IF OBJECT_ID('dbo.DimPaymentMethod','U') IS NOT NULL DROP TABLE dbo.DimPaymentMethod;
+IF OBJECT_ID('dbo.DimPaymentProvider','U') IS NOT NULL DROP TABLE dbo.DimPaymentProvider;
+
 IF OBJECT_ID('dbo.DimProduct','U') IS NOT NULL DROP TABLE dbo.DimProduct;
+IF OBJECT_ID('dbo.DimSubCategory','U') IS NOT NULL DROP TABLE dbo.DimSubCategory;
+IF OBJECT_ID('dbo.DimCategory','U') IS NOT NULL DROP TABLE dbo.DimCategory;
+
 IF OBJECT_ID('dbo.DimCustomer','U') IS NOT NULL DROP TABLE dbo.DimCustomer;
+IF OBJECT_ID('dbo.DimContact','U') IS NOT NULL DROP TABLE dbo.DimContact;
+
 IF OBJECT_ID('dbo.DimDate','U') IS NOT NULL DROP TABLE dbo.DimDate;
+IF OBJECT_ID('dbo.DimMonth','U') IS NOT NULL DROP TABLE dbo.DimMonth;
+IF OBJECT_ID('dbo.DimQuarter','U') IS NOT NULL DROP TABLE dbo.DimQuarter;
+IF OBJECT_ID('dbo.DimYear','U') IS NOT NULL DROP TABLE dbo.DimYear;
 GO
 
 
 -- 3. Create DIM tables
 
+CREATE TABLE dbo.DimYear (
+    YearID INT PRIMARY KEY,
+    YearNumber INT NOT NULL
+);
+GO
+
+CREATE TABLE dbo.DimQuarter (
+    QuarterID INT PRIMARY KEY,
+    QuarterNumber INT NOT NULL,
+    YearID INT NOT NULL,
+    FOREIGN KEY (YearID) REFERENCES dbo.DimYear(YearID)
+);
+GO
+
+CREATE TABLE dbo.DimMonth (
+    MonthID INT PRIMARY KEY,
+    MonthNumber INT NOT NULL,
+    MonthName NVARCHAR(50) NOT NULL,
+    QuarterID INT NOT NULL,
+    FOREIGN KEY (QuarterID) REFERENCES dbo.DimQuarter(QuarterID)
+);
+GO
+
 CREATE TABLE dbo.DimDate (
     DateID                  INT                 PRIMARY KEY,
     FullDate                DATE                NOT NULL,
-    [Year]                  INT                 NOT NULL,
-    [Quarter]               INT                 NOT NULL,
-    [Month]                 INT                 NOT NULL,
-    [MonthName]             NVARCHAR(50)        NOT NULL,
     [Week]                  INT                 NOT NULL,
     [DayOfWeek]             INT                 NOT NULL,
-    [DayName]               NVARCHAR(50)        NOT NULL
+    [DayName]               NVARCHAR(50)        NOT NULL,
+    YearID                  INT                 NULL, -- starting as nullable before load
+    MonthID                 INT                 NULL, -- starting as nullable before load
+    FOREIGN KEY (YearID) REFERENCES dbo.DimYear(YearID),
+    FOREIGN KEY (MonthID) REFERENCES dbo.DimMonth(MonthID)
+);
+GO
+
+CREATE TABLE dbo.DimContact (
+    ContactID                INT                PRIMARY KEY,
+    Email                    NVARCHAR(150)      NOT NULL,
+    Phone                    NVARCHAR(50)       NULL
 );
 GO
 
@@ -45,22 +87,22 @@ CREATE TABLE dbo.DimCustomer (
     CustomerID              INT                 PRIMARY KEY,
     FirstName               NVARCHAR(50)        NOT NULL,
     LastName                NVARCHAR(50)        NOT NULL,
-    Email                   NVARCHAR(150)       NOT NULL,
-    Phone                   NVARCHAR(50)        NULL
+    ContactID               INT                 NOT NULL,
+    FOREIGN KEY (ContactID) REFERENCES dbo.DimContact(ContactID)
 );
 GO
 
---Category Snowflake
+
 CREATE TABLE DimCategory (
-	CategoryID      INT         PRIMARY KEY,
-	CategoryName    NVARCHAR(50)
+	CategoryID               INT                 PRIMARY KEY,
+	CategoryName             NVARCHAR(50)
 );
 GO
 
 CREATE TABLE DimSubCategory (
-	SubCategoryID      INT      PRIMARY KEY,
-	SubCategoryName    NVARCHAR(50),
-	CategoryID         INT,
+	SubCategoryID            INT                 PRIMARY KEY,
+	SubCategoryName          NVARCHAR(50),
+	CategoryID               INT,
 	FOREIGN KEY (CategoryID) REFERENCES DimCategory(CategoryID)
 );
 GO
@@ -78,10 +120,24 @@ CREATE TABLE dbo.DimProduct (
 );
 GO
 
+CREATE TABLE dbo.DimPaymentMethod (
+    PaymentMethodID         INT                 PRIMARY KEY,
+    PaymentMethodName       NVARCHAR(20)        NOT NULL
+);
+GO
+
+CREATE TABLE dbo.DimPaymentProvider (
+    PaymentProviderID       INT                 PRIMARY KEY,
+    PaymentProviderName     NVARCHAR(20)        NOT NULL
+);
+GO
+
 CREATE TABLE dbo.DimPayment (
     PaymentID               INT                 PRIMARY KEY,
-    PaymentMethodName       NVARCHAR(20)        NOT NULL,
-    PaymentProviderName     NVARCHAR(20)        NOT NULL
+    PaymentMethodID         INT                 NOT NULL,
+    PaymentProviderID       INT                 NOT NULL,
+    FOREIGN KEY (PaymentMethodID) REFERENCES DimPaymentMethod(PaymentMethodID),
+    FOREIGN KEY (PaymentProviderID) REFERENCES DimPaymentProvider(PaymentProviderID)
 );
 GO
 
@@ -114,35 +170,77 @@ GO
 
 -- 5. Load Dims
 
-
 -- DimDate from OLTP OrderDate (distinct calendar days)
-INSERT INTO dbo.DimDate (DateID, FullDate, [Year], [Quarter], [Month], [MonthName], [Week], [DayOfWeek], [DayName])
+INSERT INTO dbo.DimDate (DateID, FullDate, [Week], [DayOfWeek], [DayName])
 SELECT
     YEAR(d.FullDate) * 10000 + MONTH(d.FullDate) * 100 + DAY(d.FullDate) AS DateID,
     d.FullDate,
-    YEAR(d.FullDate)                    AS [Year],
-    DATEPART(QUARTER, d.FullDate)       AS [Quarter],
-    MONTH(d.FullDate)                   AS [Month],
-    DATENAME(MONTH, d.FullDate)         AS [MonthName],
-    DATEPART(ISO_WEEK, d.FullDate)      AS [Week],
-    DATEPART(WEEKDAY, d.FullDate)       AS [DayOfWeek],
-    DATENAME(WEEKDAY, d.FullDate)       AS [DayName]
+    DATEPART(ISO_WEEK, d.FullDate)              AS [Week],
+    DATEPART(WEEKDAY, d.FullDate)               AS [DayOfWeek],
+    DATENAME(WEEKDAY, d.FullDate)               AS [DayName]
 FROM (
     SELECT DISTINCT CAST(o.OrderDate AS DATE) AS FullDate
     FROM NetOnNet.dbo.[Order] o
 ) d;
 
--- DimCustomer
-INSERT INTO dbo.DimCustomer (CustomerID, FirstName, LastName, Email, Phone)
+--Load DimYear
+INSERT INTO dbo.DimYear (YearID, YearNumber)
+SELECT DISTINCT YEAR(FullDate) AS YearID, YEAR(FullDate)
+FROM dbo.DimDate;
+
+
+--Load DimQuarter
+INSERT INTO dbo.DimQuarter (QuarterID, QuarterNumber, YearID)
+SELECT DISTINCT
+    YEAR(FullDate) * 10 + DATEPART(QUARTER, FullDate) AS QuarterID,
+    DATEPART(QUARTER, FullDate),
+    YEAR(FullDate)
+FROM dbo.DimDate;
+
+
+--Load DimMonth
+INSERT INTO dbo.DimMonth (MonthID, MonthNumber, MonthName, QuarterID)
+SELECT DISTINCT
+    YEAR(FullDate) * 100 + MONTH(FullDate) AS MonthID,
+    MONTH(FullDate),
+    DATENAME(MONTH,FullDate),
+    YEAR(FullDate) * 10 + DATEPART(QUARTER,FullDate) AS QuarterID
+FROM dbo.DimDate;
+
+-- Update DimDate with FKs
+UPDATE d
+SET 
+    MonthID = YEAR(d.FullDate) * 100 + MONTH(d.FullDate),
+    YearID  = YEAR(d.FullDate)  
+FROM dbo.DimDate d;
+
+-- Set MonthID and YearID to NOT NULL
+ALTER TABLE dbo.DimDate
+ALTER COLUMN MonthID INT NOT NULL;
+
+ALTER TABLE dbo.DimDate
+ALTER COLUMN YearID INT NOT NULL;
+
+
+
+--Load DimContact
+INSERT INTO dbo.DimContact (ContactID, Email, Phone)
 SELECT
-    c.CustomerID,
-    c.FirstName,
-    c.LastName,
+    c.CustomerID AS ContactID,
     c.Email,
     CAST(c.Phone AS NVARCHAR(50)) AS Phone
 FROM NetOnNet.dbo.Customer c;
 
--- DimCategory (Snowflake)
+-- DimCustomer
+INSERT INTO dbo.DimCustomer (CustomerID, FirstName, LastName, ContactID)
+SELECT
+    c.CustomerID,
+    c.FirstName,
+    c.LastName,
+    c.CustomerID
+FROM NetOnNet.dbo.Customer c;
+
+-- DimCategory
 INSERT INTO dbo.DimCategory (
     CategoryID, CategoryName
 )
@@ -178,12 +276,40 @@ SELECT
 FROM NetOnNet.dbo.Product p
 
 -- DimPayment
-INSERT INTO dbo.DimPayment (PaymentID, PaymentMethodName, PaymentProviderName)
-SELECT
-    pay.PaymentID,
-    pay.MethodName                      AS PaymentMethodName,
-    pay.ProviderName                    AS PaymentProviderName
-FROM NetOnNet.dbo.Payment pay;
+
+-- Generate PaymentMethodID since it does not exist in NetOnNet db
+INSERT INTO dbo.DimPaymentMethod (PaymentMethodID, PaymentMethodName)
+SELECT 
+    ROW_NUMBER() OVER (ORDER BY MethodName) AS PaymentMethodID,
+    MethodName
+FROM (
+    SELECT DISTINCT MethodName
+    FROM NetOnNet.dbo.Payment
+) AS x;
+
+-- Generate PaymentProviderID since it does not exist in NetOnNet db
+INSERT INTO dbo.DimPaymentProvider (PaymentProviderID, PaymentProviderName)
+SELECT 
+    ROW_NUMBER() OVER (ORDER BY ProviderName) AS PaymentProviderID,
+    ProviderName
+FROM (
+    SELECT DISTINCT ProviderName
+    FROM NetOnNet.dbo.Payment
+) AS x;
+
+-- Use PaymentMethodID and PaymentProviderID as FKs
+INSERT INTO dbo.DimPayment (PaymentID, PaymentMethodID, PaymentProviderID)
+SELECT 
+    p.PaymentID,
+    pm.PaymentMethodID,
+    pp.PaymentProviderID
+FROM NetOnNet.dbo.Payment p
+JOIN dbo.DimPaymentMethod pm
+    ON pm.PaymentMethodName = p.MethodName
+JOIN dbo.DimPaymentProvider pp
+    ON pp.PaymentProviderName = p.ProviderName;
+
+
 
 -- 6. Load fact (grain = OrderItem)
 
