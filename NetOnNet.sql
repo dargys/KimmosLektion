@@ -41,7 +41,7 @@ CREATE TABLE dbo.Product (
     Price           DECIMAL(10, 2) NOT NULL,
     Cost            DECIMAL(10, 2) NOT NULL,
     Color           NVARCHAR (20) NULL,
-    CreatedAt       DATETIME DEFAULT GETDATE() NOT NULL,
+    CreatedAt       DATETIME2(0) NOT NULL,
     ProductDetails  NVARCHAR(MAX) NULL,
     FOREIGN KEY (SubCategoryID) REFERENCES dbo.SubCategory(SubCategoryID),
     CONSTRAINT CK_ProductPrice CHECK (Price >= 0),
@@ -73,7 +73,7 @@ CREATE TABLE dbo.Payment (
     MethodName      NVARCHAR (15) NOT NULL,
     ProviderName    NVARCHAR (15) NOT NULL,
     IsApproved      BIT NOT NULL,
-    CreatedDate     DATETIME DEFAULT GETDATE() NOT NULL,
+    CreatedDate     DATETIME NOT NULL,
     CONSTRAINT CK_ValidCombination CHECK (
     (MethodName = 'Kort' AND ProviderName IN ('Visa','Mastercard')) OR
     (MethodName = 'Faktura' AND ProviderName = 'Klarna') OR
@@ -93,7 +93,7 @@ CREATE TABLE dbo.[Order] (
     OrderID         INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
     PaymentID       INT NOT NULL,
     CustomerID      INT NOT NULL,
-    OrderDate       DATETIME DEFAULT GETDATE() NOT NULL,
+    OrderDate       DATETIME NOT NULL,
     OrderStatus     NVARCHAR(20) NOT NULL,
     OrderTotalAmount DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (CustomerID) REFERENCES dbo.Customer(CustomerID),
@@ -226,218 +226,101 @@ INSERT INTO dbo.SubCategory (CategoryID, SubCategoryName) VALUES
 
 
 INSERT INTO dbo.[Product] (SubCategoryID, SKU, ProductName, Price, Cost, Color, CreatedAt, ProductDetails) VALUES
+(1, 'DATOR-001', 'Dell XPS 13 Plus', 12999.00, 7800.00, 'Silver', '2023-09-01 10:00:00', '{"brand": "Dell", "model": "XPS 13 Plus", "warrantyYears": 2, "specifications": {"processor": "Intel Core i7-1365U", "ram": "16GB LPDDR5", "storage": "512GB NVMe SSD", "display": "13.4-inch OLED 2880x1920"}}'),
+(1, 'DATOR-002', 'HP Pavilion 15', 8999.00, 5400.00, 'Charcoal', '2023-09-01 10:00:00', '{"brand": "HP", "model": "Pavilion 15-eh1000", "warrantyYears": 1, "specifications": {"processor": "AMD Ryzen 5 7520U", "ram": "8GB DDR5", "storage": "256GB SSD", "display": "15.6-inch FHD 1920x1080"}}'),
+(1, 'DATOR-003', 'Lenovo ThinkPad X1 Carbon', 14999.00, 9000.00, 'Black', '2023-09-01 10:00:00', '{"brand": "Lenovo", "model": "ThinkPad X1 Carbon Gen 11", "warrantyYears": 3, "specifications": {"processor": "Intel Core i7-1365U", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "14-inch OLED 2880x1880"}}'),
+(2, 'DATOR-004', 'Apple iPad Air 5', 8999.00, 5400.00, 'Space Gray', '2023-09-03 10:00:00', '{"brand": "Apple", "model": "iPad Air 5", "warrantyYears": 1, "specifications": {"processor": "Apple M1", "ram": "8GB", "storage": "256GB", "display": "10.9-inch Liquid Retina 2360x1640"}}'),
+(2, 'DATOR-005', 'Samsung Galaxy Tab S8 Ultra', 9999.00, 6000.00, 'Gray', '2023-09-03 10:00:00', '{"brand": "Samsung", "model": "Galaxy Tab S8 Ultra", "warrantyYears": 1, "specifications": {"processor": "Snapdragon 8 Gen 1", "ram": "12GB", "storage": "256GB", "display": "14.6-inch AMOLED 2960x1848"}}'),
+(2, 'DATOR-006', 'Apple iPad Pro 12.9', 14999.00, 9000.00, 'Silver', '2023-09-03 10:00:00', '{"brand": "Apple", "model": "iPad Pro 12.9-inch M2", "warrantyYears": 1, "specifications": {"processor": "Apple M2", "ram": "8GB", "storage": "256GB", "display": "12.9-inch Liquid Retina XDR 2732x2048"}}'),
+(3, 'DATOR-007', 'MacBook Air M2', 15999.00, 9600.00, 'Space Gray', '2023-09-05 10:00:00', '{"brand": "Apple", "model": "MacBook Air M2", "warrantyYears": 1, "specifications": {"processor": "Apple M2", "ram": "16GB Unified Memory", "storage": "512GB SSD", "display": "13.6-inch Liquid Retina 2560x1600"}}'),
+(3, 'DATOR-008', 'Microsoft Surface Laptop 5', 13499.00, 8100.00, 'Platinum', '2023-09-05 10:00:00', '{"brand": "Microsoft", "model": "Surface Laptop 5", "warrantyYears": 2, "specifications": {"processor": "Intel Core i7-1285U", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "13.5-inch PixelSense 2256x1504"}}'),
+(3, 'DATOR-009', 'ASUS ZenBook 14', 9999.00, 6000.00, 'Icy Silver', '2023-09-05 10:00:00', '{"brand": "ASUS", "model": "ZenBook 14 OLED", "warrantyYears": 2, "specifications": {"processor": "Intel Core i7-1360P", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "14-inch OLED 2880x1800"}}'),
+(4, 'DATOR-010', 'Microsoft Surface Pro 9', 11999.00, 7200.00, 'Platinum', '2023-09-07 10:00:00', '{"brand": "Microsoft", "model": "Surface Pro 9", "warrantyYears": 1, "specifications": {"processor": "Intel Core i7-1255U", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "13-inch PixelSense 2880x1920"}}'),
+(4, 'DATOR-011', 'Lenovo Yoga 9i', 10999.00, 6600.00, 'Oatmeal', '2023-09-07 10:00:00', '{"brand": "Lenovo", "model": "Yoga 9i Gen 7", "warrantyYears": 2, "specifications": {"processor": "Intel Core i7-1360P", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "14-inch IPS touchscreen 2240x1400"}}'),
+(5, 'COMP-001', 'Intel Core i7-13700K', 4999.00, 3000.00, NULL, '2023-09-09 10:00:00', '{"brand": "Intel", "model": "Core i7-13700K", "warrantyYears": 3, "specifications": {"cores": "16 cores (8P+8E)", "frequency": "3.4-5.4 GHz", "tdp": "125W", "socket": "LGA1700"}}'),
+(5, 'COMP-002', 'AMD Ryzen 7 7700X', 4499.00, 2700.00, NULL, '2023-09-09 10:00:00', '{"brand": "AMD", "model": "Ryzen 7 7700X", "warrantyYears": 3, "specifications": {"cores": "8 cores", "frequency": "4.5-5.4 GHz", "tdp": "105W", "socket": "AM5"}}'),
+(6, 'COMP-003', 'NVIDIA RTX 4080', 12999.00, 7800.00, NULL, '2023-09-11 10:00:00', '{"brand": "NVIDIA", "model": "GeForce RTX 4080", "warrantyYears": 2, "specifications": {"memory": "16GB GDDR6X", "cuda_cores": "9728", "memory_bandwidth": "576 GB/s", "power_consumption": "320W"}}'),
+(6, 'COMP-004', 'AMD RX 7900 XTX', 11999.00, 7200.00, NULL, '2023-09-11 10:00:00', '{"brand": "AMD", "model": "Radeon RX 7900 XTX", "warrantyYears": 2, "specifications": {"memory": "24GB GDDR6", "stream_processors": "6144", "memory_bandwidth": "576 GB/s", "power_consumption": "420W"}}'),
+(7, 'COMP-005', 'Corsair Vengeance DDR5 32GB', 2499.00, 1500.00, NULL, '2023-09-13 10:00:00', '{"brand": "Corsair", "model": "Vengeance DDR5", "warrantyYears": 1, "specifications": {"capacity": "32GB (2x16GB)", "speed": "5600MHz", "cas_latency": "CL36", "voltage": "1.25V"}}'),
+(7, 'COMP-006', 'G.Skill Trident Z5 64GB', 4999.00, 3000.00, NULL, '2023-09-13 10:00:00', '{"brand": "G.Skill", "model": "Trident Z5", "warrantyYears": 1, "specifications": {"capacity": "64GB (2x32GB)", "speed": "6000MHz", "cas_latency": "CL30", "voltage": "1.4V"}}'),
+(10, 'GAME-001', 'PlayStation 5', 5999.00, 3600.00, 'White', '2023-09-19 10:00:00', '{"brand": "Sony", "model": "PlayStation 5", "warrantyYears": 2, "specifications": {"processor": "AMD Zen 2 8-core 3.5 GHz", "memory": "16GB GDDR6", "storage": "825GB SSD", "resolution": "Up to 4K 120fps"}}'),
+(10, 'GAME-002', 'Xbox Series X', 5499.00, 3300.00, 'Black', '2023-09-19 10:00:00', '{"brand": "Microsoft", "model": "Xbox Series X", "warrantyYears": 2, "specifications": {"processor": "AMD Zen 2 8-core 3.8 GHz", "memory": "16GB GDDR6", "storage": "1TB SSD", "resolution": "Up to 4K 120fps"}}'),
+(10, 'GAME-003', 'Nintendo Switch OLED', 3999.00, 2400.00, 'White', '2023-09-19 10:00:00', '{"brand": "Nintendo", "model": "Switch OLED Model", "warrantyYears": 1, "specifications": {"processor": "NVIDIA Tegra X1", "memory": "4GB LPDDR4", "storage": "64GB", "display": "7-inch OLED 1280x720"}}'),
+(11, 'GAME-004', 'ASUS ROG Swift PG279QM', 4999.00, 3000.00, 'Black', '2023-09-21 10:00:00', '{"brand": "ASUS", "model": "ROG Swift PG279QM", "warrantyYears": 2, "specifications": {"size": "27 inch", "resolution": "2560x1440 QHD", "refresh_rate": "240Hz", "response_time": "1ms GTG"}}'),
+(11, 'GAME-005', 'LG UltraGear 32GN750', 5999.00, 3600.00, 'Black', '2023-09-21 10:00:00', '{"brand": "LG", "model": "UltraGear 32GN750-B", "warrantyYears": 2, "specifications": {"size": "32 inch", "resolution": "2560x1440 QHD", "refresh_rate": "240Hz", "response_time": "1ms GTG"}}'),
+(12, 'GAME-006', 'Corsair K95 Platinum XT', 1999.00, 1200.00, 'Black', '2023-09-23 10:00:00', '{"brand": "Corsair", "model": "K95 Platinum XT", "warrantyYears": 2, "specifications": {"switches": "Cherry MX Red", "layout": "Full Size 104-key", "backlighting": "RGB per-key", "connection": "Wired USB"}}'),
+(12, 'GAME-007', 'Razer BlackWidow V4', 1699.00, 1020.00, 'Black', '2023-09-23 10:00:00', '{"brand": "Razer", "model": "BlackWidow V4", "warrantyYears": 2, "specifications": {"switches": "Razer Green", "layout": "Full Size 104-key", "backlighting": "RGB per-key", "connection": "Wired USB"}}'),
+(13, 'GAME-008', 'Logitech G Pro X Superlight 2', 999.00, 600.00, 'Black', '2023-09-25 10:00:00', '{"brand": "Logitech", "model": "G Pro X Superlight 2", "warrantyYears": 2, "specifications": {"sensor": "HERO 25K", "dpi": "25600", "weight": "63g", "connectivity": "Wireless 2.4GHz"}}'),
+(13, 'GAME-009', 'Razer DeathAdder V3', 899.00, 540.00, 'Black', '2023-09-25 10:00:00', '{"brand": "Razer", "model": "DeathAdder V3", "warrantyYears": 2, "specifications": {"sensor": "Focus Pro 30K", "dpi": "30000", "weight": "63g", "connectivity": "Wired USB"}}'),
+(13, 'GAME-010', 'SteelSeries Rival 5', 799.00, 480.00, 'Black', '2023-09-25 10:00:00', '{"brand": "SteelSeries", "model": "Rival 5", "warrantyYears": 1, "specifications": {"sensor": "TrueMove Core", "dpi": "18000", "weight": "78g", "connectivity": "Wired USB"}}'),
+(14, 'HOME-001', 'Google Nest Hub Max', 2499.00, 1500.00, 'Charcoal', '2023-09-27 10:00:00', '{"brand": "Google", "model": "Nest Hub Max", "warrantyYears": 1, "specifications": {"display": "10 inch touchscreen", "resolution": "2200x1600", "connectivity": "WiFi 5 802.11ac", "assistant": "Google Assistant"}}'),
+(14, 'HOME-002', 'Amazon Echo Show 15', 1999.00, 1200.00, 'Black', '2023-09-27 10:00:00', '{"brand": "Amazon", "model": "Echo Show 15", "warrantyYears": 1, "specifications": {"display": "15.6 inch touchscreen", "resolution": "1920x1080", "connectivity": "WiFi 6 802.11ax", "assistant": "Alexa"}}'),
+(15, 'HOME-003', 'Fitbit Charge 5', 1499.00, 900.00, 'Black', '2023-09-29 10:00:00', '{"brand": "Fitbit", "model": "Charge 5", "warrantyYears": 1, "specifications": {"display": "AMOLED touchscreen", "battery": "7 days", "water_resistance": "50m", "sensors": "heart rate, SpO2, EDA"}}'),
+(15, 'HOME-004', 'Apple Watch Series 8', 3999.00, 2400.00, 'Silver', '2023-09-29 10:00:00', '{"brand": "Apple", "model": "Watch Series 8 45mm", "warrantyYears": 1, "specifications": {"display": "Retina LTPO OLED", "battery": "18 hours", "water_resistance": "50m", "sensors": "ECG, temperature, blood oxygen"}}'),
+(16, 'HOME-005', 'IKEA LINNMON Desk', 999.00, 600.00, NULL, '2023-10-01 10:00:00', '{"brand": "IKEA", "model": "LINNMON", "warrantyYears": 1, "specifications": {"material": "particle board veneer", "size": "140x60 cm", "height_adjustable": "no", "load_capacity": "50 kg"}}'),
+(17, 'HOME-006', 'Philips Hue Smart Bulbs', 1299.00, 780.00, 'White', '2023-10-03 10:00:00', '{"brand": "Philips", "model": "Hue White A19", "warrantyYears": 2, "specifications": {"brightness": "1600 lumens", "color_temperature": "2700K 6500K", "connectivity": "Bluetooth ZigBee", "lifespan": "25000 hours"}}'),
+(18, 'CARE-001', 'Dyson SuperSonic Hair Dryer', 3999.00, 2400.00, 'Platinum', '2023-10-05 10:00:00', '{"brand": "Dyson", "model": "SuperSonic", "warrantyYears": 2, "specifications": {"power": "1600W", "air_speed": "40 mph", "heat_levels": "3", "ionic_technology": "yes"}}'),
+(18, 'CARE-002', 'GHD Platinum+ Hair Styler', 1999.00, 1200.00, 'Black', '2023-10-05 10:00:00', '{"brand": "GHD", "model": "Platinum+ Styler", "warrantyYears": 2, "specifications": {"plate_width": "28mm", "heat_levels": "5", "temperature_range": "140-365F", "plate_technology": "Dual-zone"}}'),
+(19, 'CARE-003', 'Clarisonic Mia Smart', 1299.00, 780.00, 'Rose Gold', '2023-10-07 10:00:00', '{"brand": "Clarisonic", "model": "Mia Smart", "warrantyYears": 1, "specifications": {"frequency": "300 oscillations/sec", "brush_types": "sensitive, normal, deep", "battery": "22 uses per charge", "waterproof": "IPX7"}}'),
+(19, 'CARE-004', 'NuFace Trinity Pro', 699.00, 420.00, 'Rose Gold', '2023-10-07 10:00:00', '{"brand": "NuFace", "model": "Trinity PRO", "warrantyYears": 1, "specifications": {"microcurrent": "yes", "treatment_time": "5 minutes", "attachments": "facial, lips, eye", "battery": "2-3 hours"}}'),
+(20, 'CARE-005', 'Withings Body+ Smart Scale', 1299.00, 780.00, 'Black', '2023-10-09 10:00:00', '{"brand": "Withings", "model": "Body+", "warrantyYears": 2, "specifications": {"measurements": "weight, BMI, water%, muscle mass", "connectivity": "WiFi Bluetooth", "max_weight": "180kg", "accuracy": "0.1kg"}}'),
+(21, 'TV-001', 'LG OLED55C3PUA 55"', 9999.00, 6000.00, 'Black', '2023-10-11 10:00:00', '{"brand": "LG", "model": "OLED55C3PUA", "warrantyYears": 2, "specifications": {"size": "55 inch", "resolution": "4K OLED 3840x2160", "refresh_rate": "120Hz", "brightness": "200 nits peak"}}'),
+(21, 'TV-002', 'Sony K-55XR80 55"', 11999.00, 7200.00, 'Black', '2023-10-11 10:00:00', '{"brand": "Sony", "model": "K-55XR80", "warrantyYears": 3, "specifications": {"size": "55 inch", "resolution": "4K Mini-LED 3840x2160", "refresh_rate": "120Hz", "brightness": "3000 nits peak"}}'),
+(22, 'TV-003', 'Samsung QN55Q80C 55"', 7999.00, 4800.00, 'Black', '2023-10-13 10:00:00', '{"brand": "Samsung", "model": "QN55Q80C", "warrantyYears": 2, "specifications": {"size": "55 inch", "resolution": "4K QLED 3840x2160", "refresh_rate": "120Hz", "brightness": "2500 nits peak"}}'),
+(22, 'TV-004', 'TCL 65" 4K Smart TV', 4999.00, 3000.00, 'Black', '2023-10-13 10:00:00', '{"brand": "TCL", "model": "65Q640", "warrantyYears": 1, "specifications": {"size": "65 inch", "resolution": "4K LED 3840x2160", "refresh_rate": "60Hz", "smart_platform": "Google TV"}}'),
+(22, 'TV-005', 'Hisense 55" 4K Smart TV', 3999.00, 2400.00, 'Black', '2023-10-13 10:00:00', '{"brand": "Hisense", "model": "55A6G", "warrantyYears": 1, "specifications": {"size": "55 inch", "resolution": "4K LED 3840x2160", "refresh_rate": "60Hz", "smart_platform": "Android TV"}}'),
+(23, 'TV-006', 'Samsung QN65Q90D 65"', 12999.00, 7800.00, 'Black', '2023-10-15 10:00:00', '{"brand": "Samsung", "model": "QN65Q90D", "warrantyYears": 2, "specifications": {"size": "65 inch", "resolution": "4K QLED 3840x2160", "refresh_rate": "144Hz", "brightness": "3000 nits peak"}}'),
+(23, 'TV-007', 'LG 65UP7550 65"', 8999.00, 5400.00, 'Black', '2023-10-15 10:00:00', '{"brand": "LG", "model": "65UP7550", "warrantyYears": 2, "specifications": {"size": "65 inch", "resolution": "4K LED 3840x2160", "refresh_rate": "60Hz", "smart_platform": "webOS"}}'),
+(23, 'TV-008', 'Panasonic 55HX950 55"', 6999.00, 4200.00, 'Black', '2023-10-15 10:00:00', '{"brand": "Panasonic", "model": "55HX950", "warrantyYears": 2, "specifications": {"size": "55 inch", "resolution": "4K LED 3840x2160", "refresh_rate": "60Hz", "smart_platform": "my Home Screen"}}'),
+(24, 'AUDIO-001', 'Bose SoundLink Max', 2999.00, 1800.00, 'Black', '2023-10-17 10:00:00', '{"brand": "Bose", "model": "SoundLink Max", "warrantyYears": 1, "specifications": {"power": "60W", "battery": "20 hours", "connectivity": "Bluetooth 5.3 WiFi", "water_resistance": "IPX7"}}'),
+(24, 'AUDIO-002', 'Marshall Stanmore III', 1999.00, 1200.00, 'Black', '2023-10-17 10:00:00', '{"brand": "Marshall", "model": "Stanmore III", "warrantyYears": 2, "specifications": {"power": "80W RMS", "drivers": "dual woofer dual tweeter", "connectivity": "Bluetooth RCA 3.5mm", "dimensions": "560x380x250mm"}}'),
+(24, 'AUDIO-003', 'Harman Kardon Onyx Studio 7', 1499.00, 900.00, 'Black', '2023-10-17 10:00:00', '{"brand": "Harman Kardon", "model": "Onyx Studio 7", "warrantyYears": 2, "specifications": {"power": "110W RMS", "drivers": "50mm woofers", "connectivity": "Bluetooth Aux Optical", "design": "Premium wool mesh"}}'),
+(25, 'AUDIO-004', 'Sony WH-1000XM5', 3699.00, 2220.00, 'Black', '2023-10-19 10:00:00', '{"brand": "Sony", "model": "WH-1000XM5", "warrantyYears": 1, "specifications": {"noise_cancellation": "industry-leading ANC", "battery": "30 hours", "driver_size": "40mm", "connectivity": "Bluetooth 5.3"}}'),
+(25, 'AUDIO-005', 'Bose QuietComfort 45', 3499.00, 2100.00, 'Black', '2023-10-19 10:00:00', '{"brand": "Bose", "model": "QuietComfort 45", "warrantyYears": 1, "specifications": {"noise_cancellation": "dual-microphone ANC", "battery": "24 hours", "driver_type": "custom transducers", "connectivity": "Bluetooth USB-C"}}'),
+(25, 'AUDIO-006', 'Apple AirPods Pro Max', 4999.00, 3000.00, 'Silver', '2023-10-19 10:00:00', '{"brand": "Apple", "model": "AirPods Pro Max", "warrantyYears": 1, "specifications": {"noise_cancellation": "Active Noise Cancellation", "battery": "20 hours", "audio": "Spatial audio with Dolby Atmos", "drivers": "40mm custom drivers"}}'),
+(25, 'AUDIO-007', 'Sennheiser Momentum 4', 2999.00, 1800.00, 'Black', '2023-10-19 10:00:00', '{"brand": "Sennheiser", "model": "Momentum 4", "warrantyYears": 2, "specifications": {"noise_cancellation": "Adaptive NC", "battery": "60 hours", "driver_size": "42mm", "connectivity": "Bluetooth 5.3"}}'),
+(26, 'AUDIO-008', 'Blue Yeti USB Microphone', 999.00, 600.00, 'Black', '2023-10-21 10:00:00', '{"brand": "Blue", "model": "Yeti", "warrantyYears": 2, "specifications": {"capsules": "quad condenser", "pickup_patterns": "4 (cardioid omni bidirectional stereo)", "frequency": "20Hz-20kHz", "connection": "USB"}}'),
+(27, 'MOBIL-001', 'iPhone 15 Pro Max 256GB', 15999.00, 9600.00, 'Titanium Blue', '2023-10-23 10:00:00', '{"brand": "Apple", "model": "iPhone 15 Pro Max", "warrantyYears": 1, "specifications": {"processor": "A17 Pro", "ram": "8GB", "storage": "256GB", "display": "6.7-inch Super Retina XDR"}}'),
+(27, 'MOBIL-002', 'Samsung Galaxy S24 Ultra', 15499.00, 9300.00, 'Phantom Black', '2023-10-23 10:00:00', '{"brand": "Samsung", "model": "Galaxy S24 Ultra", "warrantyYears": 1, "specifications": {"processor": "Snapdragon 8 Gen 3", "ram": "12GB", "storage": "256GB", "display": "6.8-inch Dynamic AMOLED 2X"}}'),
+(27, 'MOBIL-003', 'Google Pixel 8 Pro', 12999.00, 7800.00, 'Porcelain', '2023-10-23 10:00:00', '{"brand": "Google", "model": "Pixel 8 Pro", "warrantyYears": 1, "specifications": {"processor": "Tensor G3", "ram": "12GB", "storage": "256GB", "display": "6.7-inch LTPO OLED 120Hz"}}'),
+(27, 'MOBIL-004', 'OnePlus 12', 9999.00, 6000.00, 'Black', '2023-10-23 10:00:00', '{"brand": "OnePlus", "model": "12", "warrantyYears": 1, "specifications": {"processor": "Snapdragon 8 Gen 3", "ram": "12GB", "storage": "256GB", "display": "6.7-inch AMOLED 120Hz"}}'),
+(27, 'MOBIL-005', 'Xiaomi 14 Ultra', 11999.00, 7200.00, 'Black', '2023-10-23 10:00:00', '{"brand": "Xiaomi", "model": "14 Ultra", "warrantyYears": 1, "specifications": {"processor": "Snapdragon 8 Gen 3", "ram": "16GB", "storage": "512GB", "display": "6.73-inch AMOLED 120Hz"}}'),
+(28, 'MOBIL-006', 'Apple Watch Series 9 Band', 499.00, 300.00, 'Red', '2023-10-25 10:00:00', '{"brand": "Apple", "model": "Sport Band", "warrantyYears": 1, "specifications": {"material": "fluoroelastomer", "sizes": "S/M M/L", "waterproof": "yes", "quick_change": "yes"}}'),
+(28, 'MOBIL-007', 'Samsung Galaxy Watch Strap', 399.00, 240.00, 'Black', '2023-10-25 10:00:00', '{"brand": "Samsung", "model": "Sport Band", "warrantyYears": 1, "specifications": {"material": "silicone", "sizes": "S M L", "waterproof": "yes", "quick_release": "yes"}}'),
+(29, 'MOBIL-008', 'Apple Watch Ultra 2', 5999.00, 3600.00, 'Titanium', '2023-10-27 10:00:00', '{"brand": "Apple", "model": "Watch Ultra 2", "warrantyYears": 1, "specifications": {"display": "2.04-inch Retina", "processor": "S9", "battery": "36 hours", "water_resistance": "100m"}}'),
+(29, 'MOBIL-009', 'Samsung Galaxy Watch 6 Classic', 3999.00, 2400.00, 'Silver', '2023-10-27 10:00:00', '{"brand": "Samsung", "model": "Galaxy Watch 6 Classic", "warrantyYears": 1, "specifications": {"display": "1.3-inch AMOLED", "processor": "Exynos W930", "battery": "40+ hours", "water_resistance": "50m"}}'),
+(29, 'MOBIL-010', 'Garmin Epix Gen 2', 4999.00, 3000.00, 'Black', '2023-10-27 10:00:00', '{"brand": "Garmin", "model": "Epix Gen 2", "warrantyYears": 1, "specifications": {"display": "1.4-inch AMOLED", "battery": "11 days smartwatch mode", "gps": "yes", "water_resistance": "100m"}}'),
+(30, 'MOBIL-011', 'OtterBox Defender iPhone 15', 599.00, 360.00, 'Black', '2023-10-29 10:00:00', '{"brand": "OtterBox", "model": "Defender Series", "warrantyYears": 1, "specifications": {"protection_level": "heavy-duty", "material": "polycarbonate rubber", "drop_tested": "14ft", "port_access": "precise cutouts"}}'),
+(30, 'MOBIL-012', 'Spigen Tough Armor Samsung', 399.00, 240.00, 'Black', '2023-10-29 10:00:00', '{"brand": "Spigen", "model": "Tough Armor", "warrantyYears": 1, "specifications": {"protection": "dual-layer", "material": "TPU hard PC", "weight": "minimal", "shock_absorption": "yes"}}'),
+(30, 'MOBIL-013', 'Apple Silicone Case', 699.00, 420.00, 'Midnight', '2023-10-29 10:00:00', '{"brand": "Apple", "model": "Silicone Case", "warrantyYears": 1, "specifications": {"material": "soft silicone", "lining": "velvety microfiber", "wireless_charging": "compatible", "colors_available": "10"}}'),
+(30, 'MOBIL-014', 'Samsung Leather Case', 799.00, 480.00, 'Brown', '2023-10-29 10:00:00', '{"brand": "Samsung", "model": "Leather Case", "warrantyYears": 1, "specifications": {"material": "genuine leather", "protection_level": "standard", "aesthetic": "premium look", "wireless_charging": "compatible"}}'),
+(31, 'VITV-001', 'LG Front Load Washer 8kg', 9999.00, 6000.00, 'White', '2023-10-31 10:00:00', '{"brand": "LG", "model": "WF80T4000AW", "warrantyYears": 3, "specifications": {"capacity": "8kg", "programs": "14", "rpm": "1200", "energy_class": "A+++"}}'),
+(31, 'VITV-002', 'Bosch Series 8 Washer 9kg', 11999.00, 7200.00, 'White', '2023-10-31 10:00:00', '{"brand": "Bosch", "model": "WAX32EH00", "warrantyYears": 3, "specifications": {"capacity": "9kg", "programs": "15", "rpm": "1400", "energy_class": "A+++"}}'),
+(32, 'VITV-003', 'Samsung DV22N6800HX Dryer', 8999.00, 5400.00, 'Stainless Steel', '2023-11-02 10:00:00', '{"brand": "Samsung", "model": "DV22N6800HX", "warrantyYears": 1, "specifications": {"capacity": "7.4 cu.ft", "type": "electric", "technology": "AI optimal dry", "energy_class": "A++"}}'),
+(33, 'VITV-004', 'Samsung French Door Fridge 650L', 19999.00, 12000.00, 'Stainless Steel', '2023-11-04 10:00:00', '{"brand": "Samsung", "model": "RF65R9000", "warrantyYears": 3, "specifications": {"capacity": "650L", "type": "French Door", "technology": "Twin Cooling Plus", "energy_class": "A+"}}'),
+(33, 'VITV-005', 'LG Side-by-Side Fridge 700L', 18999.00, 11400.00, 'Black', '2023-11-04 10:00:00', '{"brand": "LG", "model": "GSXV90BSAE", "warrantyYears": 3, "specifications": {"capacity": "700L", "type": "Side-by-Side", "technology": "LinearCooling", "energy_class": "A+"}}'),
+(34, 'CAM-001', 'Canon EOS R5', 24999.00, 15000.00, 'Black', '2023-11-06 10:00:00', '{"brand": "Canon", "model": "EOS R5", "warrantyYears": 2, "specifications": {"sensor": "Full Frame 45MP", "iso_range": "100-51200", "autofocus": "5655 AF points", "video": "8K 60fps"}}'),
+(34, 'CAM-002', 'Nikon D850', 19999.00, 12000.00, 'Black', '2023-11-06 10:00:00', '{"brand": "Nikon", "model": "D850", "warrantyYears": 2, "specifications": {"sensor": "Full Frame 45.7MP", "iso_range": "64-25600", "autofocus": "153 AF points", "video": "4K 30fps"}}'),
+(35, 'CAM-003', 'Sony A7R V', 22999.00, 13800.00, 'Black', '2023-11-08 10:00:00', '{"brand": "Sony", "model": "Alpha 7R V", "warrantyYears": 2, "specifications": {"sensor": "Full Frame 61MP", "iso_range": "80-32000", "autofocus": "693 AF points", "video": "4K 120fps"}}'),
+(35, 'CAM-004', 'Fujifilm X-T5', 15999.00, 9600.00, 'Silver', '2023-11-08 10:00:00', '{"brand": "Fujifilm", "model": "X-T5", "warrantyYears": 2, "specifications": {"sensor": "APS-C 40.2MP", "iso_range": "160-12800", "autofocus": "425 AF points", "video": "4K 60fps"}}'),
+(36, 'CAM-005', 'Canon RF 28-70mm f/2L', 4999.00, 3000.00, 'Black', '2023-11-10 10:00:00', '{"brand": "Canon", "model": "RF 28-70mm f/2L", "warrantyYears": 2, "specifications": {"focal_length": "28-70mm", "aperture": "f/2", "elements": "23 elements", "filter_size": "82mm"}}'),
+(36, 'CAM-006', 'Sony FE 24-70mm f/2.8 GM II', 5999.00, 3600.00, 'Black', '2023-11-10 10:00:00', '{"brand": "Sony", "model": "FE 24-70mm f/2.8 GM II", "warrantyYears": 2, "specifications": {"focal_length": "24-70mm", "aperture": "f/2.8", "elements": "21 elements", "filter_size": "77mm"}}'),
+(36, 'CAM-007', 'Nikon Z 70-200mm f/2.8S', 6999.00, 4200.00, 'Black', '2023-11-10 10:00:00', '{"brand": "Nikon", "model": "Z 70-200mm f/2.8S", "warrantyYears": 2, "specifications": {"focal_length": "70-200mm", "aperture": "f/2.8", "elements": "21 elements", "filter_size": "77mm"}}'),
+(36, 'CAM-008', 'Fujifilm XF 35mm f/1.4 R', 1999.00, 1200.00, 'Black', '2023-11-10 10:00:00', '{"brand": "Fujifilm", "model": "XF 35mm f/1.4 R", "warrantyYears": 2, "specifications": {"focal_length": "35mm", "aperture": "f/1.4", "elements": "8 elements", "filter_size": "52mm"}}'),
+(37, 'ACC-001', 'OtterBox Defender Case', 599.00, 360.00, 'Black', '2023-11-12 10:00:00', '{"brand": "OtterBox", "model": "Defender Series", "warrantyYears": 1, "specifications": {"protection": "heavy-duty", "material": "polycarbonate rubber", "drop_tested": "14ft", "port_protection": "precise cutouts"}}'),
+(37, 'ACC-002', 'Spigen Tough Armor Case', 299.00, 180.00, 'Black', '2023-11-12 10:00:00', '{"brand": "Spigen", "model": "Tough Armor", "warrantyYears": 1, "specifications": {"protection": "dual-layer", "material": "TPU hard PC", "weight": "minimal", "shock_protection": "yes"}}'),
+(37, 'ACC-003', 'Apple Silicone Case', 699.00, 420.00, 'Midnight', '2023-11-12 10:00:00', '{"brand": "Apple", "model": "Silicone Case", "warrantyYears": 1, "specifications": {"material": "soft silicone", "lining": "microfiber", "wireless_charging": "compatible", "colors": "10 available"}}'),
+(38, 'ACC-004', 'Anker USB-C Cable 2m', 199.00, 120.00, 'Black', '2023-11-14 10:00:00', '{"brand": "Anker", "model": "USB-C to USB-C", "warrantyYears": 1, "specifications": {"length": "2m", "power_delivery": "100W", "data_speed": "480Mbps USB 3.1", "certification": "USB certified"}}'),
+(38, 'ACC-005', 'Belkin Lightning Cable 1m', 249.00, 150.00, 'White', '2023-11-14 10:00:00', '{"brand": "Belkin", "model": "USB-A to Lightning", "warrantyYears": 1, "specifications": {"length": "1m", "current": "2.4A", "mfi_certified": "yes", "durability": "reinforced connector"}}'),
+(38, 'ACC-006', 'HDMI 2.1 Cable 2m', 299.00, 180.00, 'Black', '2023-11-14 10:00:00', '{"brand": "Generic", "model": "HDMI 2.1", "warrantyYears": 1, "specifications": {"length": "2m", "bandwidth": "48Gbps", "support": "8K 60Hz", "certification": "HDMI 2.1 certified"}}'),
+(39, 'ACC-007', 'Anker 67W GaN Charger', 599.00, 360.00, 'Black', '2023-11-16 10:00:00', '{"brand": "Anker", "model": "67W GaN Charger", "warrantyYears": 1, "specifications": {"power": "67W", "ports": "1x USB-C", "technology": "GaN", "compatible_devices": "3 devices"}}'),
+(39, 'ACC-008', 'Apple 20W USB-C Power Adapter', 399.00, 240.00, 'White', '2023-11-16 10:00:00', '{"brand": "Apple", "model": "20W USB-C", "warrantyYears": 1, "specifications": {"power": "20W", "compatibility": "iPhone 12+, iPad", "technology": "USB Power Delivery", "size": "compact"}}'),
+(39, 'ACC-009', 'Samsung 45W Fast Charger', 449.00, 270.00, 'Black', '2023-11-16 10:00:00', '{"brand": "Samsung", "model": "45W Charger", "warrantyYears": 1, "specifications": {"power": "45W", "compatibility": "Samsung Galaxy", "fast_charge": "35W super fast", "port": "USB-C"}}'),
+(40, 'ACC-010', 'Anker USB-C Hub 7-in-1', 699.00, 420.00, 'Silver', '2023-11-18 10:00:00', '{"brand": "Anker", "model": "7-in-1 USB-C Hub", "warrantyYears": 1, "specifications": {"ports": "HDMI, USB 3.0 x3, SD, microSD, USB-C", "compatibility": "MacBook, iPad Pro, laptops", "data_speed": "5Gbps", "power_delivery": "60W"}}'),
+(40, 'ACC-011', 'Belkin USB-C Multiport Hub', 799.00, 480.00, 'Gray', '2023-11-18 10:00:00', '{"brand": "Belkin", "model": "USB-C Multiport Hub", "warrantyYears": 2, "specifications": {"ports": "HDMI, USB 3.0 x2, USB-C, SD", "compatibility": "universal USB-C devices", "data_speed": "5Gbps", "power_delivery": "100W"}}'),
+(41, 'ACC-012', 'Spigen Tempered Glass iPhone', 299.00, 180.00, 'Clear', '2023-11-20 10:00:00', '{"brand": "Spigen", "model": "Tempered Glass", "warrantyYears": 1, "specifications": {"hardness": "9H", "oleophobic_coating": "yes", "transparency": "ultra-clear", "installation": "alignment kit included"}}'),
+(41, 'ACC-013', 'ZAGG InvisibleShield Glass', 249.00, 150.00, 'Clear', '2023-11-20 10:00:00', '{"brand": "ZAGG", "model": "InvisibleShield", "warrantyYears": 1, "specifications": {"material": "tempered glass", "hardness": "9H", "self_healing": "anti-microbial", "warranty": "drop protection warranty"}}');
 
--- Laptops (SubCategoryID 1) - 3 products
-(1, 'DATOR-001', 'Dell XPS 13 Plus', 12999.00, 7800.00, 'Silver', GETDATE(), '{"brand": "Dell", "model": "XPS 13 Plus", "warrantyYears": 2, "specifications": {"processor": "Intel Core i7-1365U", "ram": "16GB LPDDR5", "storage": "512GB NVMe SSD", "display": "13.4-inch OLED 2880x1920"}}'),
-(1, 'DATOR-002', 'HP Pavilion 15', 8999.00, 5400.00, 'Charcoal', GETDATE(), '{"brand": "HP", "model": "Pavilion 15-eh1000", "warrantyYears": 1, "specifications": {"processor": "AMD Ryzen 5 7520U", "ram": "8GB DDR5", "storage": "256GB SSD", "display": "15.6-inch FHD 1920x1080"}}'),
-(1, 'DATOR-003', 'Lenovo ThinkPad X1 Carbon', 14999.00, 9000.00, 'Black', GETDATE(), '{"brand": "Lenovo", "model": "ThinkPad X1 Carbon Gen 11", "warrantyYears": 3, "specifications": {"processor": "Intel Core i7-1365U", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "14-inch OLED 2880x1880"}}'),
-
--- Tablets (SubCategoryID 2) - 3 products
-(2, 'DATOR-004', 'Apple iPad Air 5', 8999.00, 5400.00, 'Space Gray', GETDATE(), '{"brand": "Apple", "model": "iPad Air 5", "warrantyYears": 1, "specifications": {"processor": "Apple M1", "ram": "8GB", "storage": "256GB", "display": "10.9-inch Liquid Retina 2360x1640"}}'),
-(2, 'DATOR-005', 'Samsung Galaxy Tab S8 Ultra', 9999.00, 6000.00, 'Gray', GETDATE(), '{"brand": "Samsung", "model": "Galaxy Tab S8 Ultra", "warrantyYears": 1, "specifications": {"processor": "Snapdragon 8 Gen 1", "ram": "12GB", "storage": "256GB", "display": "14.6-inch AMOLED 2960x1848"}}'),
-(2, 'DATOR-006', 'Apple iPad Pro 12.9', 14999.00, 9000.00, 'Silver', GETDATE(), '{"brand": "Apple", "model": "iPad Pro 12.9-inch M2", "warrantyYears": 1, "specifications": {"processor": "Apple M2", "ram": "8GB", "storage": "256GB", "display": "12.9-inch Liquid Retina XDR 2732x2048"}}'),
-
--- Ultrabooks (SubCategoryID 3) - 3 products
-(3, 'DATOR-007', 'MacBook Air M2', 15999.00, 9600.00, 'Space Gray', GETDATE(), '{"brand": "Apple", "model": "MacBook Air M2", "warrantyYears": 1, "specifications": {"processor": "Apple M2", "ram": "16GB Unified Memory", "storage": "512GB SSD", "display": "13.6-inch Liquid Retina 2560x1600"}}'),
-(3, 'DATOR-008', 'Microsoft Surface Laptop 5', 13499.00, 8100.00, 'Platinum', GETDATE(), '{"brand": "Microsoft", "model": "Surface Laptop 5", "warrantyYears": 2, "specifications": {"processor": "Intel Core i7-1285U", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "13.5-inch PixelSense 2256x1504"}}'),
-(3, 'DATOR-009', 'ASUS ZenBook 14', 9999.00, 6000.00, 'Icy Silver', GETDATE(), '{"brand": "ASUS", "model": "ZenBook 14 OLED", "warrantyYears": 2, "specifications": {"processor": "Intel Core i7-1360P", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "14-inch OLED 2880x1800"}}'),
-
--- 2-in-1 Devices (SubCategoryID 4) - 2 products
-(4, 'DATOR-010', 'Microsoft Surface Pro 9', 11999.00, 7200.00, 'Platinum', GETDATE(), '{"brand": "Microsoft", "model": "Surface Pro 9", "warrantyYears": 1, "specifications": {"processor": "Intel Core i7-1255U", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "13-inch PixelSense 2880x1920"}}'),
-(4, 'DATOR-011', 'Lenovo Yoga 9i', 10999.00, 6600.00, 'Oatmeal', GETDATE(), '{"brand": "Lenovo", "model": "Yoga 9i Gen 7", "warrantyYears": 2, "specifications": {"processor": "Intel Core i7-1360P", "ram": "16GB LPDDR5", "storage": "512GB SSD", "display": "14-inch IPS touchscreen 2240x1400"}}'),
-
--- ========================================
--- DATORKOMPONENTER (8 products)
--- ========================================
-
--- CPUs (SubCategoryID 5) - 2 products
-(5, 'COMP-001', 'Intel Core i7-13700K', 4999.00, 3000.00, NULL, GETDATE(), '{"brand": "Intel", "model": "Core i7-13700K", "warrantyYears": 3, "specifications": {"cores": "16 cores (8P+8E)", "frequency": "3.4-5.4 GHz", "tdp": "125W", "socket": "LGA1700"}}'),
-(5, 'COMP-002', 'AMD Ryzen 7 7700X', 4499.00, 2700.00, NULL, GETDATE(), '{"brand": "AMD", "model": "Ryzen 7 7700X", "warrantyYears": 3, "specifications": {"cores": "8 cores", "frequency": "4.5-5.4 GHz", "tdp": "105W", "socket": "AM5"}}'),
-
--- GPUs (SubCategoryID 6) - 2 products
-(6, 'COMP-003', 'NVIDIA RTX 4080', 12999.00, 7800.00, NULL, GETDATE(), '{"brand": "NVIDIA", "model": "GeForce RTX 4080", "warrantyYears": 2, "specifications": {"memory": "16GB GDDR6X", "cuda_cores": "9728", "memory_bandwidth": "576 GB/s", "power_consumption": "320W"}}'),
-(6, 'COMP-004', 'AMD RX 7900 XTX', 11999.00, 7200.00, NULL, GETDATE(), '{"brand": "AMD", "model": "Radeon RX 7900 XTX", "warrantyYears": 2, "specifications": {"memory": "24GB GDDR6", "stream_processors": "6144", "memory_bandwidth": "576 GB/s", "power_consumption": "420W"}}'),
-
--- RAM Memory (SubCategoryID 7) - 2 products
-(7, 'COMP-005', 'Corsair Vengeance DDR5 32GB', 2499.00, 1500.00, NULL, GETDATE(), '{"brand": "Corsair", "model": "Vengeance DDR5", "warrantyYears": 1, "specifications": {"capacity": "32GB (2x16GB)", "speed": "5600MHz", "cas_latency": "CL36", "voltage": "1.25V"}}'),
-(7, 'COMP-006', 'G.Skill Trident Z5 64GB', 4999.00, 3000.00, NULL, GETDATE(), '{"brand": "G.Skill", "model": "Trident Z5", "warrantyYears": 1, "specifications": {"capacity": "64GB (2x32GB)", "speed": "6000MHz", "cas_latency": "CL30", "voltage": "1.4V"}}'),
-
--- ========================================
--- GAMING (10 products)
--- ========================================
-
--- Consoles (SubCategoryID 10) - 3 products
-(10, 'GAME-001', 'PlayStation 5', 5999.00, 3600.00, 'White', GETDATE(), '{"brand": "Sony", "model": "PlayStation 5", "warrantyYears": 2, "specifications": {"processor": "AMD Zen 2 8-core 3.5 GHz", "memory": "16GB GDDR6", "storage": "825GB SSD", "resolution": "Up to 4K 120fps"}}'),
-(10, 'GAME-002', 'Xbox Series X', 5499.00, 3300.00, 'Black', GETDATE(), '{"brand": "Microsoft", "model": "Xbox Series X", "warrantyYears": 2, "specifications": {"processor": "AMD Zen 2 8-core 3.8 GHz", "memory": "16GB GDDR6", "storage": "1TB SSD", "resolution": "Up to 4K 120fps"}}'),
-(10, 'GAME-003', 'Nintendo Switch OLED', 3999.00, 2400.00, 'White', GETDATE(), '{"brand": "Nintendo", "model": "Switch OLED Model", "warrantyYears": 1, "specifications": {"processor": "NVIDIA Tegra X1", "memory": "4GB LPDDR4", "storage": "64GB", "display": "7-inch OLED 1280x720"}}'),
-
--- Gaming Monitors (SubCategoryID 11) - 2 products
-(11, 'GAME-004', 'ASUS ROG Swift PG279QM', 4999.00, 3000.00, 'Black', GETDATE(), '{"brand": "ASUS", "model": "ROG Swift PG279QM", "warrantyYears": 2, "specifications": {"size": "27 inch", "resolution": "2560x1440 QHD", "refresh_rate": "240Hz", "response_time": "1ms GTG"}}'),
-(11, 'GAME-005', 'LG UltraGear 32GN750', 5999.00, 3600.00, 'Black', GETDATE(), '{"brand": "LG", "model": "UltraGear 32GN750-B", "warrantyYears": 2, "specifications": {"size": "32 inch", "resolution": "2560x1440 QHD", "refresh_rate": "240Hz", "response_time": "1ms GTG"}}'),
-
--- Gaming Keyboards (SubCategoryID 12) - 2 products
-(12, 'GAME-006', 'Corsair K95 Platinum XT', 1999.00, 1200.00, 'Black', GETDATE(), '{"brand": "Corsair", "model": "K95 Platinum XT", "warrantyYears": 2, "specifications": {"switches": "Cherry MX Red", "layout": "Full Size 104-key", "backlighting": "RGB per-key", "connection": "Wired USB"}}'),
-(12, 'GAME-007', 'Razer BlackWidow V4', 1699.00, 1020.00, 'Black', GETDATE(), '{"brand": "Razer", "model": "BlackWidow V4", "warrantyYears": 2, "specifications": {"switches": "Razer Green", "layout": "Full Size 104-key", "backlighting": "RGB per-key", "connection": "Wired USB"}}'),
-
--- Gaming Mice (SubCategoryID 13) - 3 products
-(13, 'GAME-008', 'Logitech G Pro X Superlight 2', 999.00, 600.00, 'Black', GETDATE(), '{"brand": "Logitech", "model": "G Pro X Superlight 2", "warrantyYears": 2, "specifications": {"sensor": "HERO 25K", "dpi": "25600", "weight": "63g", "connectivity": "Wireless 2.4GHz"}}'),
-(13, 'GAME-009', 'Razer DeathAdder V3', 899.00, 540.00, 'Black', GETDATE(), '{"brand": "Razer", "model": "DeathAdder V3", "warrantyYears": 2, "specifications": {"sensor": "Focus Pro 30K", "dpi": "30000", "weight": "63g", "connectivity": "Wired USB"}}'),
-(13, 'GAME-010', 'SteelSeries Rival 5', 799.00, 480.00, 'Black', GETDATE(), '{"brand": "SteelSeries", "model": "Rival 5", "warrantyYears": 1, "specifications": {"sensor": "TrueMove Core", "dpi": "18000", "weight": "78g", "connectivity": "Wired USB"}}'),
-
--- ========================================
--- HEM & FRITID (6 products)
--- ========================================
-
--- Smart Home (SubCategoryID 14) - 2 products
-(14, 'HOME-001', 'Google Nest Hub Max', 2499.00, 1500.00, 'Charcoal', GETDATE(), '{"brand": "Google", "model": "Nest Hub Max", "warrantyYears": 1, "specifications": {"display": "10 inch touchscreen", "resolution": "2200x1600", "connectivity": "WiFi 5 802.11ac", "assistant": "Google Assistant"}}'),
-(14, 'HOME-002', 'Amazon Echo Show 15', 1999.00, 1200.00, 'Black', GETDATE(), '{"brand": "Amazon", "model": "Echo Show 15", "warrantyYears": 1, "specifications": {"display": "15.6 inch touchscreen", "resolution": "1920x1080", "connectivity": "WiFi 6 802.11ax", "assistant": "Alexa"}}'),
-
--- Sports Equipment (SubCategoryID 15) - 2 products
-(15, 'HOME-003', 'Fitbit Charge 5', 1499.00, 900.00, 'Black', GETDATE(), '{"brand": "Fitbit", "model": "Charge 5", "warrantyYears": 1, "specifications": {"display": "AMOLED touchscreen", "battery": "7 days", "water_resistance": "50m", "sensors": "heart rate, SpO2, EDA"}}'),
-(15, 'HOME-004', 'Apple Watch Series 8', 3999.00, 2400.00, 'Silver', GETDATE(), '{"brand": "Apple", "model": "Watch Series 8 45mm", "warrantyYears": 1, "specifications": {"display": "Retina LTPO OLED", "battery": "18 hours", "water_resistance": "50m", "sensors": "ECG, temperature, blood oxygen"}}'),
-
--- Furniture (SubCategoryID 16) - 1 product
-(16, 'HOME-005', 'IKEA LINNMON Desk', 999.00, 600.00, NULL, GETDATE(), '{"brand": "IKEA", "model": "LINNMON", "warrantyYears": 1, "specifications": {"material": "particle board veneer", "size": "140x60 cm", "height_adjustable": "no", "load_capacity": "50 kg"}}'),
-
--- Lighting (SubCategoryID 17) - 1 product
-(17, 'HOME-006', 'Philips Hue Smart Bulbs', 1299.00, 780.00, 'White', GETDATE(), '{"brand": "Philips", "model": "Hue White A19", "warrantyYears": 2, "specifications": {"brightness": "1600 lumens", "color_temperature": "2700K 6500K", "connectivity": "Bluetooth ZigBee", "lifespan": "25000 hours"}}'),
-
--- ========================================
--- PERSONV�RD (5 products)
--- ========================================
-
--- Hair Care (SubCategoryID 18) - 2 products
-(18, 'CARE-001', 'Dyson SuperSonic Hair Dryer', 3999.00, 2400.00, 'Platinum', GETDATE(), '{"brand": "Dyson", "model": "SuperSonic", "warrantyYears": 2, "specifications": {"power": "1600W", "air_speed": "40 mph", "heat_levels": "3", "ionic_technology": "yes"}}'),
-(18, 'CARE-002', 'GHD Platinum+ Hair Styler', 1999.00, 1200.00, 'Black', GETDATE(), '{"brand": "GHD", "model": "Platinum+ Styler", "warrantyYears": 2, "specifications": {"plate_width": "28mm", "heat_levels": "5", "temperature_range": "140-365F", "plate_technology": "Dual-zone"}}'),
-
--- Skincare (SubCategoryID 19) - 2 products
-(19, 'CARE-003', 'Clarisonic Mia Smart', 1299.00, 780.00, 'Rose Gold', GETDATE(), '{"brand": "Clarisonic", "model": "Mia Smart", "warrantyYears": 1, "specifications": {"frequency": "300 oscillations/sec", "brush_types": "sensitive, normal, deep", "battery": "22 uses per charge", "waterproof": "IPX7"}}'),
-(19, 'CARE-004', 'NuFace Trinity Pro', 699.00, 420.00, 'Rose Gold', GETDATE(), '{"brand": "NuFace", "model": "Trinity PRO", "warrantyYears": 1, "specifications": {"microcurrent": "yes", "treatment_time": "5 minutes", "attachments": "facial, lips, eye", "battery": "2-3 hours"}}'),
-
--- Health Devices (SubCategoryID 20) - 1 product
-(20, 'CARE-005', 'Withings Body+ Smart Scale', 1299.00, 780.00, 'Black', GETDATE(), '{"brand": "Withings", "model": "Body+", "warrantyYears": 2, "specifications": {"measurements": "weight, BMI, water%, muscle mass", "connectivity": "WiFi Bluetooth", "max_weight": "180kg", "accuracy": "0.1kg"}}'),
-
--- ========================================
--- TV (8 products)
--- ========================================
-
--- OLED TV (SubCategoryID 21) - 2 products
-(21, 'TV-001', 'LG OLED55C3PUA 55"', 9999.00, 6000.00, 'Black', GETDATE(), '{"brand": "LG", "model": "OLED55C3PUA", "warrantyYears": 2, "specifications": {"size": "55 inch", "resolution": "4K OLED 3840x2160", "refresh_rate": "120Hz", "brightness": "200 nits peak"}}'),
-(21, 'TV-002', 'Sony K-55XR80 55"', 11999.00, 7200.00, 'Black', GETDATE(), '{"brand": "Sony", "model": "K-55XR80", "warrantyYears": 3, "specifications": {"size": "55 inch", "resolution": "4K Mini-LED 3840x2160", "refresh_rate": "120Hz", "brightness": "3000 nits peak"}}'),
-
--- LED TV (SubCategoryID 22) - 3 products
-(22, 'TV-003', 'Samsung QN55Q80C 55"', 7999.00, 4800.00, 'Black', GETDATE(), '{"brand": "Samsung", "model": "QN55Q80C", "warrantyYears": 2, "specifications": {"size": "55 inch", "resolution": "4K QLED 3840x2160", "refresh_rate": "120Hz", "brightness": "2500 nits peak"}}'),
-(22, 'TV-004', 'TCL 65\" 4K Smart TV', 4999.00, 3000.00, 'Black', GETDATE(), '{"brand": "TCL", "model": "65Q640", "warrantyYears": 1, "specifications": {"size": "65 inch", "resolution": "4K LED 3840x2160", "refresh_rate": "60Hz", "smart_platform": "Google TV"}}'),
-(22, 'TV-005', 'Hisense 55" 4K Smart TV', 3999.00, 2400.00, 'Black', GETDATE(), '{"brand": "Hisense", "model": "55A6G", "warrantyYears": 1, "specifications": {"size": "55 inch", "resolution": "4K LED 3840x2160", "refresh_rate": "60Hz", "smart_platform": "Android TV"}}'),
-
--- Smart TV (SubCategoryID 23) - 3 products
-(23, 'TV-006', 'Samsung QN65Q90D 65"', 12999.00, 7800.00, 'Black', GETDATE(), '{"brand": "Samsung", "model": "QN65Q90D", "warrantyYears": 2, "specifications": {"size": "65 inch", "resolution": "4K QLED 3840x2160", "refresh_rate": "144Hz", "brightness": "3000 nits peak"}}'),
-(23, 'TV-007', 'LG 65UP7550 65"', 8999.00, 5400.00, 'Black', GETDATE(), '{"brand": "LG", "model": "65UP7550", "warrantyYears": 2, "specifications": {"size": "65 inch", "resolution": "4K LED 3840x2160", "refresh_rate": "60Hz", "smart_platform": "webOS"}}'),
-(23, 'TV-008', 'Panasonic 55HX950 55"', 6999.00, 4200.00, 'Black', GETDATE(), '{"brand": "Panasonic", "model": "55HX950", "warrantyYears": 2, "specifications": {"size": "55 inch", "resolution": "4K LED 3840x2160", "refresh_rate": "60Hz", "smart_platform": "my Home Screen"}}'),
-
--- ========================================
--- LJUD (8 products)
--- ========================================
-
--- Speakers (SubCategoryID 24) - 3 products
-(24, 'AUDIO-001', 'Bose SoundLink Max', 2999.00, 1800.00, 'Black', GETDATE(), '{"brand": "Bose", "model": "SoundLink Max", "warrantyYears": 1, "specifications": {"power": "60W", "battery": "20 hours", "connectivity": "Bluetooth 5.3 WiFi", "water_resistance": "IPX7"}}'),
-(24, 'AUDIO-002', 'Marshall Stanmore III', 1999.00, 1200.00, 'Black', GETDATE(), '{"brand": "Marshall", "model": "Stanmore III", "warrantyYears": 2, "specifications": {"power": "80W RMS", "drivers": "dual woofer dual tweeter", "connectivity": "Bluetooth RCA 3.5mm", "dimensions": "560x380x250mm"}}'),
-(24, 'AUDIO-003', 'Harman Kardon Onyx Studio 7', 1499.00, 900.00, 'Black', GETDATE(), '{"brand": "Harman Kardon", "model": "Onyx Studio 7", "warrantyYears": 2, "specifications": {"power": "110W RMS", "drivers": "50mm woofers", "connectivity": "Bluetooth Aux Optical", "design": "Premium wool mesh"}}'),
-
--- Headphones (SubCategoryID 25) - 4 products
-(25, 'AUDIO-004', 'Sony WH-1000XM5', 3699.00, 2220.00, 'Black', GETDATE(), '{"brand": "Sony", "model": "WH-1000XM5", "warrantyYears": 1, "specifications": {"noise_cancellation": "industry-leading ANC", "battery": "30 hours", "driver_size": "40mm", "connectivity": "Bluetooth 5.3"}}'),
-(25, 'AUDIO-005', 'Bose QuietComfort 45', 3499.00, 2100.00, 'Black', GETDATE(), '{"brand": "Bose", "model": "QuietComfort 45", "warrantyYears": 1, "specifications": {"noise_cancellation": "dual-microphone ANC", "battery": "24 hours", "driver_type": "custom transducers", "connectivity": "Bluetooth USB-C"}}'),
-(25, 'AUDIO-006', 'Apple AirPods Pro Max', 4999.00, 3000.00, 'Silver', GETDATE(), '{"brand": "Apple", "model": "AirPods Pro Max", "warrantyYears": 1, "specifications": {"noise_cancellation": "Active Noise Cancellation", "battery": "20 hours", "audio": "Spatial audio with Dolby Atmos", "drivers": "40mm custom drivers"}}'),
-(25, 'AUDIO-007', 'Sennheiser Momentum 4', 2999.00, 1800.00, 'Black', GETDATE(), '{"brand": "Sennheiser", "model": "Momentum 4", "warrantyYears": 2, "specifications": {"noise_cancellation": "Adaptive NC", "battery": "60 hours", "driver_size": "42mm", "connectivity": "Bluetooth 5.3"}}'),
-
--- Microphones (SubCategoryID 26) - 1 product
-(26, 'AUDIO-008', 'Blue Yeti USB Microphone', 999.00, 600.00, 'Black', GETDATE(), '{"brand": "Blue", "model": "Yeti", "warrantyYears": 2, "specifications": {"capsules": "quad condenser", "pickup_patterns": "4 (cardioid omni bidirectional stereo)", "frequency": "20Hz-20kHz", "connection": "USB"}}'),
-
--- ========================================
--- MOBIL & SMARTWATCH (14 products)
--- ========================================
-
--- Smartphones (SubCategoryID 27) - 5 products
-(27, 'MOBIL-001', 'iPhone 15 Pro Max 256GB', 15999.00, 9600.00, 'Titanium Blue', GETDATE(), '{"brand": "Apple", "model": "iPhone 15 Pro Max", "warrantyYears": 1, "specifications": {"processor": "A17 Pro", "ram": "8GB", "storage": "256GB", "display": "6.7-inch Super Retina XDR"}}'),
-(27, 'MOBIL-002', 'Samsung Galaxy S24 Ultra', 15499.00, 9300.00, 'Phantom Black', GETDATE(), '{"brand": "Samsung", "model": "Galaxy S24 Ultra", "warrantyYears": 1, "specifications": {"processor": "Snapdragon 8 Gen 3", "ram": "12GB", "storage": "256GB", "display": "6.8-inch Dynamic AMOLED 2X"}}'),
-(27, 'MOBIL-003', 'Google Pixel 8 Pro', 12999.00, 7800.00, 'Porcelain', GETDATE(), '{"brand": "Google", "model": "Pixel 8 Pro", "warrantyYears": 1, "specifications": {"processor": "Tensor G3", "ram": "12GB", "storage": "256GB", "display": "6.7-inch LTPO OLED 120Hz"}}'),
-(27, 'MOBIL-004', 'OnePlus 12', 9999.00, 6000.00, 'Black', GETDATE(), '{"brand": "OnePlus", "model": "12", "warrantyYears": 1, "specifications": {"processor": "Snapdragon 8 Gen 3", "ram": "12GB", "storage": "256GB", "display": "6.7-inch AMOLED 120Hz"}}'),
-(27, 'MOBIL-005', 'Xiaomi 14 Ultra', 11999.00, 7200.00, 'Black', GETDATE(), '{"brand": "Xiaomi", "model": "14 Ultra", "warrantyYears": 1, "specifications": {"processor": "Snapdragon 8 Gen 3", "ram": "16GB", "storage": "512GB", "display": "6.73-inch AMOLED 120Hz"}}'),
-
--- Smartwatch Accessories (SubCategoryID 28) - 2 products
-(28, 'MOBIL-006', 'Apple Watch Series 9 Band', 499.00, 300.00, 'Red', GETDATE(), '{"brand": "Apple", "model": "Sport Band", "warrantyYears": 1, "specifications": {"material": "fluoroelastomer", "sizes": "S/M M/L", "waterproof": "yes", "quick_change": "yes"}}'),
-(28, 'MOBIL-007', 'Samsung Galaxy Watch Strap', 399.00, 240.00, 'Black', GETDATE(), '{"brand": "Samsung", "model": "Sport Band", "warrantyYears": 1, "specifications": {"material": "silicone", "sizes": "S M L", "waterproof": "yes", "quick_release": "yes"}}'),
-
--- Smartwatches (SubCategoryID 29) - 3 products
-(29, 'MOBIL-008', 'Apple Watch Ultra 2', 5999.00, 3600.00, 'Titanium', GETDATE(), '{"brand": "Apple", "model": "Watch Ultra 2", "warrantyYears": 1, "specifications": {"display": "2.04-inch Retina", "processor": "S9", "battery": "36 hours", "water_resistance": "100m"}}'),
-(29, 'MOBIL-009', 'Samsung Galaxy Watch 6 Classic', 3999.00, 2400.00, 'Silver', GETDATE(), '{"brand": "Samsung", "model": "Galaxy Watch 6 Classic", "warrantyYears": 1, "specifications": {"display": "1.3-inch AMOLED", "processor": "Exynos W930", "battery": "40+ hours", "water_resistance": "50m"}}'),
-(29, 'MOBIL-010', 'Garmin Epix Gen 2', 4999.00, 3000.00, 'Black', GETDATE(), '{"brand": "Garmin", "model": "Epix Gen 2", "warrantyYears": 1, "specifications": {"display": "1.4-inch AMOLED", "battery": "11 days smartwatch mode", "gps": "yes", "water_resistance": "100m"}}'),
-
--- Mobile Cases (SubCategoryID 30) - 4 products
-(30, 'MOBIL-011', 'OtterBox Defender iPhone 15', 599.00, 360.00, 'Black', GETDATE(), '{"brand": "OtterBox", "model": "Defender Series", "warrantyYears": 1, "specifications": {"protection_level": "heavy-duty", "material": "polycarbonate rubber", "drop_tested": "14ft", "port_access": "precise cutouts"}}'),
-(30, 'MOBIL-012', 'Spigen Tough Armor Samsung', 399.00, 240.00, 'Black', GETDATE(), '{"brand": "Spigen", "model": "Tough Armor", "warrantyYears": 1, "specifications": {"protection": "dual-layer", "material": "TPU hard PC", "weight": "minimal", "shock_absorption": "yes"}}'),
-(30, 'MOBIL-013', 'Apple Silicone Case', 699.00, 420.00, 'Midnight', GETDATE(), '{"brand": "Apple", "model": "Silicone Case", "warrantyYears": 1, "specifications": {"material": "soft silicone", "lining": "velvety microfiber", "wireless_charging": "compatible", "colors_available": "10"}}'),
-(30, 'MOBIL-014', 'Samsung Leather Case', 799.00, 480.00, 'Brown', GETDATE(), '{"brand": "Samsung", "model": "Leather Case", "warrantyYears": 1, "specifications": {"material": "genuine leather", "protection_level": "standard", "aesthetic": "premium look", "wireless_charging": "compatible"}}'),
-
--- ========================================
--- VITVAROR (5 products)
--- ========================================
-
--- Washing Machines (SubCategoryID 31) - 2 products
-(31, 'VITV-001', 'LG Front Load Washer 8kg', 9999.00, 6000.00, 'White', GETDATE(), '{"brand": "LG", "model": "WF80T4000AW", "warrantyYears": 3, "specifications": {"capacity": "8kg", "programs": "14", "rpm": "1200", "energy_class": "A+++"}}'),
-(31, 'VITV-002', 'Bosch Series 8 Washer 9kg', 11999.00, 7200.00, 'White', GETDATE(), '{"brand": "Bosch", "model": "WAX32EH00", "warrantyYears": 3, "specifications": {"capacity": "9kg", "programs": "15", "rpm": "1400", "energy_class": "A+++"}}'),
-
--- Dryers (SubCategoryID 32) - 1 product
-(32, 'VITV-003', 'Samsung DV22N6800HX Dryer', 8999.00, 5400.00, 'Stainless Steel', GETDATE(), '{"brand": "Samsung", "model": "DV22N6800HX", "warrantyYears": 1, "specifications": {"capacity": "7.4 cu.ft", "type": "electric", "technology": "AI optimal dry", "energy_class": "A++"}}'),
-
--- Refrigerators (SubCategoryID 33) - 2 products
-(33, 'VITV-004', 'Samsung French Door Fridge 650L', 19999.00, 12000.00, 'Stainless Steel', GETDATE(), '{"brand": "Samsung", "model": "RF65R9000", "warrantyYears": 3, "specifications": {"capacity": "650L", "type": "French Door", "technology": "Twin Cooling Plus", "energy_class": "A+"}}'),
-(33, 'VITV-005', 'LG Side-by-Side Fridge 700L', 18999.00, 11400.00, 'Black', GETDATE(), '{"brand": "LG", "model": "GSXV90BSAE", "warrantyYears": 3, "specifications": {"capacity": "700L", "type": "Side-by-Side", "technology": "LinearCooling", "energy_class": "A+"}}'),
-
--- ========================================
--- KAMERA & FOTO (8 products)
--- ========================================
-
--- DSLR Cameras (SubCategoryID 34) - 2 products
-(34, 'CAM-001', 'Canon EOS R5', 24999.00, 15000.00, 'Black', GETDATE(), '{"brand": "Canon", "model": "EOS R5", "warrantyYears": 2, "specifications": {"sensor": "Full Frame 45MP", "iso_range": "100-51200", "autofocus": "5655 AF points", "video": "8K 60fps"}}'),
-(34, 'CAM-002', 'Nikon D850', 19999.00, 12000.00, 'Black', GETDATE(), '{"brand": "Nikon", "model": "D850", "warrantyYears": 2, "specifications": {"sensor": "Full Frame 45.7MP", "iso_range": "64-25600", "autofocus": "153 AF points", "video": "4K 30fps"}}'),
-
--- Mirrorless Cameras (SubCategoryID 35) - 2 products
-(35, 'CAM-003', 'Sony A7R V', 22999.00, 13800.00, 'Black', GETDATE(), '{"brand": "Sony", "model": "Alpha 7R V", "warrantyYears": 2, "specifications": {"sensor": "Full Frame 61MP", "iso_range": "80-32000", "autofocus": "693 AF points", "video": "4K 120fps"}}'),
-(35, 'CAM-004', 'Fujifilm X-T5', 15999.00, 9600.00, 'Silver', GETDATE(), '{"brand": "Fujifilm", "model": "X-T5", "warrantyYears": 2, "specifications": {"sensor": "APS-C 40.2MP", "iso_range": "160-12800", "autofocus": "425 AF points", "video": "4K 60fps"}}'),
-
--- Lenses (SubCategoryID 36) - 4 products
-(36, 'CAM-005', 'Canon RF 28-70mm f/2L', 4999.00, 3000.00, 'Black', GETDATE(), '{"brand": "Canon", "model": "RF 28-70mm f/2L", "warrantyYears": 2, "specifications": {"focal_length": "28-70mm", "aperture": "f/2", "elements": "23 elements", "filter_size": "82mm"}}'),
-(36, 'CAM-006', 'Sony FE 24-70mm f/2.8 GM II', 5999.00, 3600.00, 'Black', GETDATE(), '{"brand": "Sony", "model": "FE 24-70mm f/2.8 GM II", "warrantyYears": 2, "specifications": {"focal_length": "24-70mm", "aperture": "f/2.8", "elements": "21 elements", "filter_size": "77mm"}}'),
-(36, 'CAM-007', 'Nikon Z 70-200mm f/2.8S', 6999.00, 4200.00, 'Black', GETDATE(), '{"brand": "Nikon", "model": "Z 70-200mm f/2.8S", "warrantyYears": 2, "specifications": {"focal_length": "70-200mm", "aperture": "f/2.8", "elements": "21 elements", "filter_size": "77mm"}}'),
-(36, 'CAM-008', 'Fujifilm XF 35mm f/1.4 R', 1999.00, 1200.00, 'Black', GETDATE(), '{"brand": "Fujifilm", "model": "XF 35mm f/1.4 R", "warrantyYears": 2, "specifications": {"focal_length": "35mm", "aperture": "f/1.4", "elements": "8 elements", "filter_size": "52mm"}}'),
-
--- ========================================
--- TILLBEH�R (12 products)
--- ========================================
-
--- Phone Cases (SubCategoryID 37) - 3 products
-(37, 'ACC-001', 'OtterBox Defender Case', 599.00, 360.00, 'Black', GETDATE(), '{"brand": "OtterBox", "model": "Defender Series", "warrantyYears": 1, "specifications": {"protection": "heavy-duty", "material": "polycarbonate rubber", "drop_tested": "14ft", "port_protection": "precise cutouts"}}'),
-(37, 'ACC-002', 'Spigen Tough Armor Case', 299.00, 180.00, 'Black', GETDATE(), '{"brand": "Spigen", "model": "Tough Armor", "warrantyYears": 1, "specifications": {"protection": "dual-layer", "material": "TPU hard PC", "weight": "minimal", "shock_protection": "yes"}}'),
-(37, 'ACC-003', 'Apple Silicone Case', 699.00, 420.00, 'Midnight', GETDATE(), '{"brand": "Apple", "model": "Silicone Case", "warrantyYears": 1, "specifications": {"material": "soft silicone", "lining": "microfiber", "wireless_charging": "compatible", "colors": "10 available"}}'),
-
--- Cables (SubCategoryID 38) - 3 products
-(38, 'ACC-004', 'Anker USB-C Cable 2m', 199.00, 120.00, 'Black', GETDATE(), '{"brand": "Anker", "model": "USB-C to USB-C", "warrantyYears": 1, "specifications": {"length": "2m", "power_delivery": "100W", "data_speed": "480Mbps USB 3.1", "certification": "USB certified"}}'),
-(38, 'ACC-005', 'Belkin Lightning Cable 1m', 249.00, 150.00, 'White', GETDATE(), '{"brand": "Belkin", "model": "USB-A to Lightning", "warrantyYears": 1, "specifications": {"length": "1m", "current": "2.4A", "mfi_certified": "yes", "durability": "reinforced connector"}}'),
-(38, 'ACC-006', 'HDMI 2.1 Cable 2m', 299.00, 180.00, 'Black', GETDATE(), '{"brand": "Generic", "model": "HDMI 2.1", "warrantyYears": 1, "specifications": {"length": "2m", "bandwidth": "48Gbps", "support": "8K 60Hz", "certification": "HDMI 2.1 certified"}}'),
-
--- Chargers (SubCategoryID 39) - 3 products
-(39, 'ACC-007', 'Anker 67W GaN Charger', 599.00, 360.00, 'Black', GETDATE(), '{"brand": "Anker", "model": "67W GaN Charger", "warrantyYears": 1, "specifications": {"power": "67W", "ports": "1x USB-C", "technology": "GaN", "compatible_devices": "3 devices"}}'),
-(39, 'ACC-008', 'Apple 20W USB-C Power Adapter', 399.00, 240.00, 'White', GETDATE(), '{"brand": "Apple", "model": "20W USB-C", "warrantyYears": 1, "specifications": {"power": "20W", "compatibility": "iPhone 12+, iPad", "technology": "USB Power Delivery", "size": "compact"}}'),
-(39, 'ACC-009', 'Samsung 45W Fast Charger', 449.00, 270.00, 'Black', GETDATE(), '{"brand": "Samsung", "model": "45W Charger", "warrantyYears": 1, "specifications": {"power": "45W", "compatibility": "Samsung Galaxy", "fast_charge": "35W super fast", "port": "USB-C"}}'),
-
--- Adapters (SubCategoryID 40) - 2 products
-(40, 'ACC-010', 'Anker USB-C Hub 7-in-1', 699.00, 420.00, 'Silver', GETDATE(), '{"brand": "Anker", "model": "7-in-1 USB-C Hub", "warrantyYears": 1, "specifications": {"ports": "HDMI, USB 3.0 x3, SD, microSD, USB-C", "compatibility": "MacBook, iPad Pro, laptops", "data_speed": "5Gbps", "power_delivery": "60W"}}'),
-(40, 'ACC-011', 'Belkin USB-C Multiport Hub', 799.00, 480.00, 'Gray', GETDATE(), '{"brand": "Belkin", "model": "USB-C Multiport Hub", "warrantyYears": 2, "specifications": {"ports": "HDMI, USB 3.0 x2, USB-C, SD", "compatibility": "universal USB-C devices", "data_speed": "5Gbps", "power_delivery": "100W"}}'),
-
--- Screen Protectors (SubCategoryID 41) - 2 products
-(41, 'ACC-012', 'Spigen Tempered Glass iPhone', 299.00, 180.00, 'Clear', GETDATE(), '{"brand": "Spigen", "model": "Tempered Glass", "warrantyYears": 1, "specifications": {"hardness": "9H", "oleophobic_coating": "yes", "transparency": "ultra-clear", "installation": "alignment kit included"}}'),
-(41, 'ACC-013', 'ZAGG InvisibleShield Glass', 249.00, 150.00, 'Clear', GETDATE(), '{"brand": "ZAGG", "model": "InvisibleShield", "warrantyYears": 1, "specifications": {"material": "tempered glass", "hardness": "9H", "self_healing": "anti-microbial", "warranty": "drop protection warranty"}}');
 
 INSERT INTO dbo.Customer (FirstName, LastName, Email, Phone) VALUES
 ('Anders', 'Svensson', 'anders.svensson@gmail.com', '0701234567'),
