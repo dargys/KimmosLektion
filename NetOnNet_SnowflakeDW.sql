@@ -369,4 +369,38 @@ GROUP BY d.FullDate
 ORDER BY d.FullDate DESC;
 */
 
-select * from FactSales
+-- 7 Example queries
+
+-- Top 10 kunder baserat på totalt spenderat
+-- joinar FactSales, DimCustomer, DimContact
+
+SELECT TOP 10
+    cust.FirstName + ' ' + cust.LastName                        AS CustomerName,
+    cont.Email,
+    cont.Phone,
+    COUNT(DISTINCT f.OrderID)                                   AS OrderCount,
+    SUM(f.TotalAmount)                                          AS TotalLifetimeSpend,
+    SUM(f.DiscountAmount)                                       AS TotalDiscounts,
+    SUM(f.RefundedAmount)                                       AS TotalRefunds
+FROM dbo.FactSales          f
+JOIN dbo.DimCustomer         cust ON cust.CustomerID  = f.CustomerID
+JOIN dbo.DimContact          cont ON cont.ContactID   = cust.ContactID
+GROUP BY cust.FirstName, cust.LastName, cont.Email, cont.Phone
+ORDER BY TotalLifetimeSpend DESC;
+
+-- Betalmetod statistik
+-- joinar FactSales, DimPayment, DimPaymentMethod, DimPaymentProvider
+
+SELECT
+    pmeth.PaymentMethodName,
+    pprov.PaymentProviderName,
+    COUNT(*)                                                    AS TransactionCount,
+    SUM(f.TotalAmount)                                          AS TotalRevenue,
+    AVG(f.TotalAmount)                                          AS AvgOrderValue,
+    SUM(f.RefundedAmount)                                       AS TotalRefunded
+FROM dbo.FactSales           f
+JOIN dbo.DimPayment          dp    ON dp.PaymentID         = f.PaymentID
+JOIN dbo.DimPaymentMethod    pmeth ON pmeth.PaymentMethodID   = dp.PaymentMethodID
+JOIN dbo.DimPaymentProvider  pprov ON pprov.PaymentProviderID = dp.PaymentProviderID
+GROUP BY pmeth.PaymentMethodName, pprov.PaymentProviderName
+ORDER BY TotalRevenue DESC;
