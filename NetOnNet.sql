@@ -130,7 +130,7 @@ CREATE TABLE dbo.[Return] (
     ReturnDate  DATE NOT NULL,
     Reason      NVARCHAR(100),
     [Status]    NVARCHAR(20) NOT NULL,
-    ReturnedAmount DECIMAL (10,2) NULL,
+    RefundedAmount DECIMAL (10,2) NULL,
     Notes       NVARCHAR(MAX) NULL,
     FOREIGN KEY (OrderItemID) REFERENCES dbo.OrderItem(OrderItemID),
     CONSTRAINT CK_ReturnReason CHECK (Reason IN ('Defekt', 'StämmerInte', 'Skadad', 'KundRequest', 'Övrigt')),
@@ -1860,7 +1860,7 @@ INSERT INTO dbo.OrderItem (OrderID, ProductID, LineTotal, DiscountApplied) VALUE
 -- OrderTotal = 3898
 
 -- Order 163 (2 items)
-(163, 16, 499.00, 2000.00),     -- 2499 - 2000 = 499
+(163, 16, 400.00, 99.00),     
 (163, 30, 1499.00, 0.00),       -- 1499 - 0 = 1499
 -- OrderTotal = 1998
 
@@ -2093,32 +2093,32 @@ INSERT INTO dbo.OrderItem (OrderID, ProductID, LineTotal, DiscountApplied) VALUE
 -- OrderTotal = 8698
 
 
-INSERT INTO dbo.[Return] (OrderItemID, ReturnDate, Reason, [Status], ReturnedAmount, Notes) VALUES
-(15, '2025-03-10', 'Defekt', 'Godkänd', 8999.00, 'Returnerad artikel'),
+INSERT INTO dbo.[Return] (OrderItemID, ReturnDate, Reason, [Status], RefundedAmount, Notes) VALUES
+(15, '2025-03-10', 'Defekt', 'Godkänd', 399.00, 'Returnerad artikel'),
 (42, '2025-03-15', 'StämmerInte', 'Initierad', 3499.00, 'Returnerad artikel'),
-(67, '2025-03-20', 'Skadad', 'Slutförd', 14999.00, 'Returnerad artikel'),
-(89, '2025-03-18', 'KundRequest', 'Godkänd', 1299.00, 'Returnerad artikel'),
+(67, '2025-03-20', 'Skadad', 'Slutförd', 1499.00, 'Returnerad artikel'),
+(89, '2025-03-18', 'KundRequest', 'Godkänd', 3699.00, 'Returnerad artikel'),
 (103, '2025-03-22', 'Övrigt', 'Avvisad', 599.00, 'Returnerad artikel'),
 (128, '2025-03-25', 'Defekt', 'Initierad', 4999.00, 'Returnerad artikel'),
-(145, '2025-03-28', 'StämmerInte', 'Godkänd', 6999.00, 'Returnerad artikel'),
-(162, '2025-04-02', 'Skadad', 'Slutförd', 11999.00, 'Returnerad artikel'),
-(178, '2025-04-05', 'Defekt', 'Godkänd', 7999.00, 'Returnerad artikel'),
+(145, '2025-03-28', 'StämmerInte', 'Godkänd', 1499.00, 'Returnerad artikel'),
+(162, '2025-04-02', 'Skadad', 'Slutförd', 1499.00, 'Returnerad artikel'),
+(178, '2025-04-05', 'Defekt', 'Godkänd', 11999.00, 'Returnerad artikel'),
 (195, '2025-04-10', 'KundRequest', 'Initierad', 3999.00, 'Returnerad artikel'),
 (210, '2025-04-12', 'StämmerInte', 'Avvisad', 1999.00, 'Returnerad artikel'),
 (228, '2025-04-15', 'Övrigt', 'Godkänd', 9999.00, 'Returnerad artikel'),
 (245, '2025-04-20', 'Defekt', 'Slutförd', 24999.00, 'Returnerad artikel'),
 (262, '2025-04-22', 'Skadad', 'Initierad', 2499.00, 'Returnerad artikel'),
-(278, '2025-04-25', 'KundRequest', 'Godkänd', 5999.00, 'Returnerad artikel'),
+(278, '2025-04-25', 'KundRequest', 'Godkänd', 1299.00, 'Returnerad artikel'),
 (295, '2025-05-01', 'StämmerInte', 'Slutförd', 749.00, 'Returnerad artikel'),
-(312, '2025-05-05', 'Defekt', 'Godkänd', 14999.00, 'Returnerad artikel'),
+(312, '2025-05-05', 'Defekt', 'Godkänd', 299.00, 'Returnerad artikel'),
 (328, '2025-05-08', 'Övrigt', 'Initierad', 1299.00, 'Returnerad artikel'),
 (345, '2025-05-12', 'Skadad', 'Avvisad', 3999.00, 'Returnerad artikel'),
-(346, '2025-05-15', 'KundRequest', 'Slutförd', 12999.00, 'Returnerad artikel'),
-(38, '2025-05-20', 'StämmerInte', 'Godkänd', 449.00, 'Returnerad artikel'),
+(346, '2025-05-15', 'KundRequest', 'Slutförd', 8099.00, 'Returnerad artikel'),
+(38, '2025-05-20', 'StämmerInte', 'Godkänd', 2499.00, 'Returnerad artikel'),
 (347, '2025-05-25', 'Defekt', 'Initierad', 6999.00, 'Returnerad artikel'),
-(348, '2025-06-01', 'Övrigt', 'Slutförd', 9999.00, 'Returnerad artikel'),
-(328, '2025-06-05', 'Skadad', 'Godkänd', 4999.00, 'Returnerad artikel'),
+(348, '2025-06-01', 'Övrigt', 'Slutförd', 1299.00, 'Returnerad artikel'),
+(328, '2025-06-05', 'Skadad', 'Godkänd', 1299.00, 'Returnerad artikel'),
 (315, '2025-06-10', 'KundRequest', 'Avvisad', 1499.00, 'Returnerad artikel'),
 (311, '2025-06-15', 'StämmerInte', 'Initierad', 7999.00, 'Returnerad artikel'),
-(310, '2025-06-20', 'Defekt', 'Slutförd', 34999.00, 'Returnerad artikel');
+(310, '2025-06-20', 'Defekt', 'Slutförd', 11999.00, 'Returnerad artikel');
 
