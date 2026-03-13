@@ -41,24 +41,24 @@ GO
 -- 3. Create DIM tables
 
 CREATE TABLE dbo.DimYear (
-    YearID INT PRIMARY KEY,
-    YearNumber INT NOT NULL
+    YearID                   INT PRIMARY KEY,
+    YearNumber               INT                 NOT NULL
 );
 GO
 
 CREATE TABLE dbo.DimQuarter (
-    QuarterID INT PRIMARY KEY,
-    QuarterNumber INT NOT NULL,
-    YearID INT NOT NULL,
+    QuarterID                INT PRIMARY KEY,
+    QuarterNumber            INT                NOT NULL,
+    YearID                   INT                NOT NULL,
     FOREIGN KEY (YearID) REFERENCES dbo.DimYear(YearID)
 );
 GO
 
 CREATE TABLE dbo.DimMonth (
-    MonthID INT PRIMARY KEY,
-    MonthNumber INT NOT NULL,
-    MonthName NVARCHAR(50) NOT NULL,
-    QuarterID INT NOT NULL,
+    MonthID                   INT PRIMARY KEY,
+    MonthNumber               INT               NOT NULL,
+    MonthName                 NVARCHAR(50)      NOT NULL,
+    QuarterID                 INT               NOT NULL,
     FOREIGN KEY (QuarterID) REFERENCES dbo.DimQuarter(QuarterID)
 );
 GO
@@ -152,7 +152,6 @@ CREATE TABLE dbo.FactSales (
     OrderID                 INT                 NOT NULL,   -- degenerate dimension
     OrderItemID             INT                 NOT NULL,   -- degenerate dimension (grain = order item)
     PurchasePriceSales      DECIMAL(10,2)       NOT NULL,
-    Quantity                INT                 NOT NULL,
     UnitPriceSales          DECIMAL(10,2)       NOT NULL,
     TotalAmount             DECIMAL(10,2)       NOT NULL,
     DiscountAmount          DECIMAL(10,2)       NOT NULL,
@@ -268,10 +267,10 @@ SELECT
     p.ProductID,
     p.ProductName,
     p.SKU,
-    p.Price                             AS UnitPriceProduct,
-    p.Cost                              AS PurchasePriceProduct,
+    p.UnitPrice                             AS UnitPriceProduct,
+    p.PurchasePrice                     AS PurchasePriceProduct,
     p.Color,
-    CAST(p.CreatedAt AS DATE) AS CreatedDateProduct,
+    CAST(p.CreatedDate AS DATE)           AS CreatedDateProduct,
     p.SubCategoryID
 FROM NetOnNet.dbo.Product p
 
@@ -316,7 +315,7 @@ JOIN dbo.DimPaymentProvider pp
 INSERT INTO dbo.FactSales (
     DateID, ProductID, CustomerID, PaymentID,
     OrderID, OrderItemID,
-    PurchasePriceSales, Quantity, UnitPriceSales,
+    PurchasePriceSales, UnitPriceSales,
     TotalAmount, DiscountAmount, RefundedAmount, PaymentIsApproved, PaymentCreatedDate
 )
 SELECT
@@ -326,19 +325,30 @@ SELECT
     o.PaymentID,
     oi.OrderID,
     oi.OrderItemID,
-    p.Cost                              AS PurchasePriceSales,
-    oi.Quantity,
-    CAST(oi.LineTotal / NULLIF(oi.Quantity, 0) AS DECIMAL(10,2)) AS UnitPriceSales,
-    CAST(oi.LineTotal AS DECIMAL(10,2)) AS TotalAmount,
-    CAST(ISNULL(oi.DiscountApplied, 0) AS DECIMAL(10,2)) AS DiscountAmount,
-    NULL AS RefundedAmount,
-    pay.IsApproved AS PaymentIsApproved,
-    pay.CreatedDate AS PaymentCreatedDate
+    p.PurchasePrice                                         AS PurchasePriceSales,
+    CAST(oi.LineTotal AS DECIMAL(10,2))                     AS UnitPriceSales,
+    CAST(
+        ISNULL(oi.LineTotal,0)
+        - ISNULL(oi.DiscountApplied,0)
+        - ISNULL(r.ReturnedAmount,0) AS DECIMAL(10,2))      AS TotalAmount,
+    CAST(ISNULL(oi.DiscountApplied, 0) AS DECIMAL(10,2))    AS DiscountAmount,
+    CAST(ISNULL(r.ReturnedAmount,0) AS DECIMAL(10,2))       AS RefundedAmount,
+    pay.IsApproved                                          AS PaymentIsApproved,
+    pay.CreatedDate                                         AS PaymentCreatedDate
 FROM NetOnNet.dbo.OrderItem oi
 JOIN NetOnNet.dbo.[Order] o ON o.OrderID = oi.OrderID
-JOIN NetOnNet.dbo.Product p ON p.ProductID = oi.ProductID
-JOIN NetOnNet.dbo.Payment pay ON pay.PaymentID = o.PaymentID;
-
+JOIN NetOnNet.dbo.[Product] p ON p.ProductID = oi.ProductID
+JOIN NetOnNet.dbo.Payment pay ON pay.PaymentID = o.PaymentID
+LEFT JOIN (
+    SELECT  
+        OrderItemID,
+        SUM(ReturnedAmount) AS ReturnedAmount
+    FROM NetOnNet.dbo.[Return]
+    WHERE [Status] IN ('Godkänd', 'Slutförd')
+    GROUP BY OrderItemID
+) r
+    ON r.OrderItemID = oi.OrderItemID
+ WHERE pay.IsApproved = 1;
 
 -- For testing:
 /*
@@ -358,3 +368,39 @@ JOIN dbo.DimDate d ON d.DateID = f.DateID
 GROUP BY d.FullDate
 ORDER BY d.FullDate DESC;
 */
+
+-- 7 Example queries
+
+-- Top 10 kunder baserat på totalt spenderat
+-- joinar FactSales, DimCustomer, DimContact
+
+SELECT TOP 10
+    cust.FirstName + ' ' + cust.LastName                        AS CustomerName,
+    cont.Email,
+    cont.Phone,
+    COUNT(DISTINCT f.OrderID)                                   AS OrderCount,
+    SUM(f.TotalAmount)                                          AS TotalLifetimeSpend,
+    SUM(f.DiscountAmount)                                       AS TotalDiscounts,
+    SUM(f.RefundedAmount)                                       AS TotalRefunds
+FROM dbo.FactSales          f
+JOIN dbo.DimCustomer         cust ON cust.CustomerID  = f.CustomerID
+JOIN dbo.DimContact          cont ON cont.ContactID   = cust.ContactID
+GROUP BY cust.FirstName, cust.LastName, cont.Email, cont.Phone
+ORDER BY TotalLifetimeSpend DESC;
+
+-- Betalmetod statistik
+-- joinar FactSales, DimPayment, DimPaymentMethod, DimPaymentProvider
+
+SELECT
+    pmeth.PaymentMethodName,
+    pprov.PaymentProviderName,
+    COUNT(*)                                                    AS TransactionCount,
+    SUM(f.TotalAmount)                                          AS TotalRevenue,
+    AVG(f.TotalAmount)                                          AS AvgOrderValue,
+    SUM(f.RefundedAmount)                                       AS TotalRefunded
+FROM dbo.FactSales           f
+JOIN dbo.DimPayment          dp    ON dp.PaymentID         = f.PaymentID
+JOIN dbo.DimPaymentMethod    pmeth ON pmeth.PaymentMethodID   = dp.PaymentMethodID
+JOIN dbo.DimPaymentProvider  pprov ON pprov.PaymentProviderID = dp.PaymentProviderID
+GROUP BY pmeth.PaymentMethodName, pprov.PaymentProviderName
+ORDER BY TotalRevenue DESC;
