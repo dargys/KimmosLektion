@@ -71,7 +71,6 @@ CREATE TABLE dbo.DimDate (
     [DayName]               NVARCHAR(50)        NOT NULL,
     YearID                  INT                 NULL, -- starting as nullable before load
     MonthID                 INT                 NULL, -- starting as nullable before load
-    FOREIGN KEY (YearID) REFERENCES dbo.DimYear(YearID),
     FOREIGN KEY (MonthID) REFERENCES dbo.DimMonth(MonthID)
 );
 GO
