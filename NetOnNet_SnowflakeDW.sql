@@ -326,13 +326,12 @@ SELECT
     oi.OrderID,
     oi.OrderItemID,
     p.PurchasePrice                                         AS PurchasePriceSales,
-    CAST(oi.LineTotal AS DECIMAL(10,2))                     AS UnitPriceSales,
+    CAST(p.UnitPrice AS DECIMAL(10,2))                      AS UnitPriceSales,
     CAST(
         ISNULL(oi.LineTotal,0)
-        - ISNULL(oi.DiscountApplied,0)
-        - ISNULL(r.ReturnedAmount,0) AS DECIMAL(10,2))      AS TotalAmount,
+        - ISNULL(r.RefundedAmount,0) AS DECIMAL(10,2))      AS TotalAmount,
     CAST(ISNULL(oi.DiscountApplied, 0) AS DECIMAL(10,2))    AS DiscountAmount,
-    CAST(ISNULL(r.ReturnedAmount,0) AS DECIMAL(10,2))       AS RefundedAmount,
+    CAST(ISNULL(r.RefundedAmount,0) AS DECIMAL(10,2))       AS RefundedAmount,
     pay.IsApproved                                          AS PaymentIsApproved,
     pay.CreatedDate                                         AS PaymentCreatedDate
 FROM NetOnNet.dbo.OrderItem oi
@@ -342,7 +341,7 @@ JOIN NetOnNet.dbo.Payment pay ON pay.PaymentID = o.PaymentID
 LEFT JOIN (
     SELECT  
         OrderItemID,
-        SUM(ReturnedAmount) AS ReturnedAmount
+        SUM(RefundedAmount) AS RefundedAmount
     FROM NetOnNet.dbo.[Return]
     WHERE [Status] IN ('Godkänd', 'Slutförd')
     GROUP BY OrderItemID
