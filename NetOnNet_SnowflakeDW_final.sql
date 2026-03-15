@@ -348,24 +348,6 @@ LEFT JOIN (
     ON r.OrderItemID = oi.OrderItemID
  WHERE pay.IsApproved = 1;
 
--- For testing:
-/*
-SELECT COUNT(*)     AS DimDateRows      FROM dbo.DimDate;
-SELECT COUNT(*)     AS DimCustomerRows  FROM dbo.DimCustomer;
-SELECT COUNT(*)     AS DimProductRows   FROM dbo.DimProduct;
-SELECT COUNT(*)     AS DimPaymentRows   FROM dbo.DimPayment;
-SELECT COUNT(*)     AS FactSalesRows    FROM dbo.FactSales;
-
--- revenue:
-
-SELECT TOP 10
-    d.FullDate,
-    SUM(f.TotalAmount) AS Revenue
-FROM dbo.FactSales f
-JOIN dbo.DimDate d ON d.DateID = f.DateID
-GROUP BY d.FullDate
-ORDER BY d.FullDate DESC;
-*/
 
 -- 7. Example queries
 
