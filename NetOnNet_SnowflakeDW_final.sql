@@ -351,7 +351,7 @@ LEFT JOIN (
 
 -- 7. Example queries
 
--- Top 10 kunder baserat på totalt spenderat
+-- 7.1 Topp 10 kunder baserat på totalt spenderat belopp
 -- joinar FactSales, DimCustomer, DimContact
 
 SELECT TOP 10
@@ -368,7 +368,7 @@ JOIN dbo.DimContact          cont ON cont.ContactID   = cust.ContactID
 GROUP BY cust.FirstName, cust.LastName, cont.Email, cont.Phone
 ORDER BY TotalLifetimeSpend DESC;
 
--- Betalmetod statistik
+-- 7.2 Betalmetod statistik
 -- joinar FactSales, DimPayment, DimPaymentMethod, DimPaymentProvider
 
 SELECT
