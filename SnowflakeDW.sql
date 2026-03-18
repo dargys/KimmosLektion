@@ -340,7 +340,7 @@ JOIN NetOnNet.dbo.Payment pay ON pay.PaymentID = o.PaymentID
 LEFT JOIN (
     SELECT  
         OrderItemID,
-        SUM(ReturnedAmount) AS RefundedAmount
+        SUM(RefundedAmount) AS RefundedAmount
     FROM NetOnNet.dbo.[Return]
     WHERE [Status] IN ('Godkänd', 'Slutförd')
     GROUP BY OrderItemID
