@@ -71,7 +71,6 @@ CREATE TABLE dbo.DimDate (
     [DayName]               NVARCHAR(50)        NOT NULL,
     YearID                  INT                 NULL, -- starting as nullable before load
     MonthID                 INT                 NULL, -- starting as nullable before load
-    FOREIGN KEY (YearID) REFERENCES dbo.DimYear(YearID),
     FOREIGN KEY (MonthID) REFERENCES dbo.DimMonth(MonthID)
 );
 GO
@@ -341,7 +340,7 @@ JOIN NetOnNet.dbo.Payment pay ON pay.PaymentID = o.PaymentID
 LEFT JOIN (
     SELECT  
         OrderItemID,
-        SUM(RefundedAmount) AS RefundedAmount
+        SUM(ReturnedAmount) AS RefundedAmount
     FROM NetOnNet.dbo.[Return]
     WHERE [Status] IN ('Godkänd', 'Slutförd')
     GROUP BY OrderItemID
@@ -349,28 +348,10 @@ LEFT JOIN (
     ON r.OrderItemID = oi.OrderItemID
  WHERE pay.IsApproved = 1;
 
--- For testing:
-/*
-SELECT COUNT(*)     AS DimDateRows      FROM dbo.DimDate;
-SELECT COUNT(*)     AS DimCustomerRows  FROM dbo.DimCustomer;
-SELECT COUNT(*)     AS DimProductRows   FROM dbo.DimProduct;
-SELECT COUNT(*)     AS DimPaymentRows   FROM dbo.DimPayment;
-SELECT COUNT(*)     AS FactSalesRows    FROM dbo.FactSales;
 
--- revenue:
+-- 7. Example queries
 
-SELECT TOP 10
-    d.FullDate,
-    SUM(f.TotalAmount) AS Revenue
-FROM dbo.FactSales f
-JOIN dbo.DimDate d ON d.DateID = f.DateID
-GROUP BY d.FullDate
-ORDER BY d.FullDate DESC;
-*/
-
--- 7 Example queries
-
--- Top 10 kunder baserat på totalt spenderat
+-- 7.1 Topp 10 kunder baserat på totalt spenderat belopp
 -- joinar FactSales, DimCustomer, DimContact
 
 SELECT TOP 10
@@ -387,7 +368,7 @@ JOIN dbo.DimContact          cont ON cont.ContactID   = cust.ContactID
 GROUP BY cust.FirstName, cust.LastName, cont.Email, cont.Phone
 ORDER BY TotalLifetimeSpend DESC;
 
--- Betalmetod statistik
+-- 7.2 Betalmetod statistik
 -- joinar FactSales, DimPayment, DimPaymentMethod, DimPaymentProvider
 
 SELECT
